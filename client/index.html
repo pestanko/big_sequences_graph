@@ -9,6 +9,7 @@
         <link ref="stylesheet" href="js/c3/c3.min.css"/>
 
         <script src="js/d3.min.js">
+
         </script>
 
 
@@ -46,6 +47,7 @@
             <ul>
                 <li>
                     <button onclick="generateNew()">Generate new Random</button>
+                    <button onclick="generateNewDomain()">Generate new Domain</button>
                 </li>
             </ul>
 
@@ -56,16 +58,21 @@
         <script>
             var data = null;
             var dataSize = 255;
-            var svg;
+            var svg = null;
 
-            function dummy_data(length)
+            function dummy_data(length, lower, upper)
             {
-                result = [];
+
+                lower = lower || 50;
+                upper = upper || 200;
+                var range = upper - lower;
+
+
+                var result = [];
                 for(var i = 0; i < length ;i++)
                 {
-                    var y = Math.floor(Math.random() * 150) + 50;
-                    var x = i;
-                    result.push({x: x, y: y});
+                    var y = Math.floor(Math.random() * range) + lower;
+                    result.push({x_ax: i, y: y});
                 }
                 return result;
             }
@@ -76,26 +83,35 @@
                 updateGraph();
             }
 
+            function generateNewDomain()
+            {
+                data = dummy_data(dataSize, 100, 1000);
+                updateGraph();
+            }
+
 
             function updateGraph()
             {
                 var line = d3.svg.line()
-                        .x(function(d) { return x(d.x); })
+                        .x(function(d) { return x(d.x_ax); })
                         .y(function(d) { return y(d.y); });
 
 
 
                 var i  = 0;
-                x.domain(d3.extent(data, function(d) { console.log(i); return d.x;  }));
-                y.domain(d3.extent(data, function(d) { return d.y }));
+                x.domain(d3.extent(data, function(d) { return d.x_ax; }));
+                y.domain(d3.extent(data, function(d) { return d.y; }));
 
+                svg.select(".x").call(xAxis);
+                svg.select(".y").call(yAxis);
 
-                svg.select("path").remove();
+                svg.select(".line").remove();
 
                 svg.append("path")
                         .datum(data)
                         .attr("class", "line")
                         .attr("d", line);
+
 
             }
 
