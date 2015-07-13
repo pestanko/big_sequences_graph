@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Graph big number files
+        </title>
+
+        <link ref="stylesheet" href="css/layout.css"/>
+        <link ref="stylesheet" href="js/c3/c3.min.css"/>
+
+        <script src="js/d3.min.js">
+        </script>
+
+
+        <style>
+
+            body {
+                font: 10px sans-serif;
+            }
+
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: #000;
+                shape-rendering: crispEdges;
+            }
+
+            .x.axis path {
+                display: none;
+            }
+
+            .line {
+                fill: none;
+                stroke: steelblue;
+                stroke-width: 1.5px;
+            }
+
+        </style>
+
+
+
+    </head>
+
+    <body>
+        <div id="container">
+            <ul>
+                <li>
+                    <button onclick="generateNew()">Generate new Random</button>
+                </li>
+            </ul>
+
+        </div>
+
+
+
+        <script>
+            var data = null;
+            var dataSize = 255;
+            var svg;
+
+            function dummy_data(length)
+            {
+                result = [];
+                for(var i = 0; i < length ;i++)
+                {
+                    var y = Math.floor(Math.random() * 150) + 50;
+                    var x = i;
+                    result.push({x: x, y: y});
+                }
+                return result;
+            }
+
+            function generateNew()
+            {
+                data = dummy_data(dataSize);
+                updateGraph();
+            }
+
+
+            function updateGraph()
+            {
+                var line = d3.svg.line()
+                        .x(function(d) { return x(d.x); })
+                        .y(function(d) { return y(d.y); });
+
+
+
+                var i  = 0;
+                x.domain(d3.extent(data, function(d) { console.log(i); return d.x;  }));
+                y.domain(d3.extent(data, function(d) { return d.y }));
+
+
+                svg.select("path").remove();
+
+                svg.append("path")
+                        .datum(data)
+                        .attr("class", "line")
+                        .attr("d", line);
+
+            }
+
+
+            var margin = {top: 20, right: 20, bottom: 30, left: 50},
+                    width = 960 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom;
+
+
+            var x = d3.time.scale()
+                    .range([0, width]);
+
+            var y = d3.scale.linear()
+                    .range([height, 0]);
+
+            var xAxis = d3.svg.axis()
+                    .scale(x)
+                    .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left");
+
+            svg = d3.select("body").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis);
+
+            svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .text("Price ($)");
+
+            data = dummy_data(dataSize);
+
+            updateGraph();
+
+
+
+        </script>
+
+
+    </body>
+
+
+
+
+</html>
