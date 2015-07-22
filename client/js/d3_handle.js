@@ -1,20 +1,22 @@
 /**
- * Created by wermington on 13.7.2015.
+ * Created by Peter Stanko on 13.7.2015.
  */
 
 
-function d3_handle()
+function D3_handle()
 {
 
     var margin = {top: 20, right: 20, bottom: 30, left: 50},
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
-    this.prototype.data = null;
+    this.data = null;
     var _this = this;
+    var container = null;
+    var path_container = null;
 
 
-    var x = d3.time.scale()
+    var x = d3.scale.linear()
         .range([0, width]);
 
     var y = d3.scale.linear()
@@ -34,12 +36,16 @@ function d3_handle()
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    svg.append("g")
+    container = svg.append("g").attr("class", "container");
+    path_container = container.append("g").attr("class", "path_container");
+
+
+    container.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
 
-    svg.append("g")
+    container.append("g")
         .attr("class", "y axis")
         .call(yAxis)
         .append("text")
@@ -50,7 +56,7 @@ function d3_handle()
         .text("Price ($)");
 
 
-    function updatePath()
+    this.updatePath = function()
     {
         var data = _this.data;
         if(data == null) return;
@@ -61,19 +67,27 @@ function d3_handle()
             .y(function(d) { return y(d.y); });
 
 
-
-
         x.domain(d3.extent(data, function(d) { return d.x; }));
         y.domain(d3.extent(data, function(d) { return d.y; }));
 
+        container.select(".x").call(xAxis);
+        container.select(".y").call(yAxis);
 
-        svg.select("path").remove();
 
-        svg.append("path")
+        var ln  = path_container.select(".line");
+        ln.remove();
+
+        path_container.append("path")
             .datum(data)
             .attr("class", "line")
             .attr("d", line);
-    }
+    };
+
+
+    this.updateData = function(data)
+    {
+        _this.data = data;
+    };
 
 }
 

@@ -12,6 +12,9 @@
 
         </script>
 
+        <script src="js/d3_handle.js"></script>
+        <script src="js/websocket_handler.js"></script>
+
 
         <style>
 
@@ -46,8 +49,13 @@
         <div id="container">
             <ul>
                 <li>
-                    <button onclick="generateNew()">Generate new Random</button>
-                    <button onclick="generateNewDomain()">Generate new Domain</button>
+                    <button id="genNew">Generate new Random</button>
+                </li><li>
+                    <button id="genDomain">Generate new Domain</button>
+                </li>
+                <li>
+                    <input type="text" value="wss://localhost:10888/" id="ws_host" />
+                    <button id="ws_connect">Connect!</button>
                 </li>
             </ul>
 
@@ -56,109 +64,52 @@
 
 
         <script>
-            var data = null;
-            var dataSize = 255;
-            var svg = null;
 
-            function dummy_data(length, lower, upper)
-            {
+            var main = function() {
 
-                lower = lower || 50;
-                upper = upper || 200;
-                var range = upper - lower;
+                var data = null;
+                var dataSize = 255;
+                var hwnd = new D3_handle();
 
 
-                var result = [];
-                for(var i = 0; i < length ;i++)
-                {
-                    var y = Math.floor(Math.random() * range) + lower;
-                    result.push({x_ax: i, y: y});
+                function dummy_data(length, lower, upper) {
+
+                    lower = lower || 50;
+                    upper = upper || 200;
+                    var range = upper - lower;
+
+
+                    var result = [];
+                    for (var i = 0; i < length; i++) {
+                        var y = Math.floor(Math.random() * range) + lower;
+                        result.push({x: i, y: y});
+                    }
+                    return result;
                 }
-                return result;
-            }
 
-            function generateNew()
-            {
-                data = dummy_data(dataSize);
-                updateGraph();
-            }
+                d3.select("#genNew").on("click", function() {
+                    data = dummy_data(dataSize);
+                    hwnd.data = data;
+                    hwnd.updatePath();
+                });
 
-            function generateNewDomain()
-            {
-                data = dummy_data(dataSize, 100, 1000);
-                updateGraph();
-            }
+                d3.select("#genDomain").on("click", function()
+                {
+                    data = dummy_data(dataSize, 100, 1000);
+                    hwnd.updateData(data);
+                    hwnd.updatePath();
+                });
+                hwnd.data = dummy_data(255);
 
-
-            function updateGraph()
-            {
-                var line = d3.svg.line()
-                        .x(function(d) { return x(d.x_ax); })
-                        .y(function(d) { return y(d.y); });
+                hwnd.updatePath();
 
 
-
-                var i  = 0;
-                x.domain(d3.extent(data, function(d) { return d.x_ax; }));
-                y.domain(d3.extent(data, function(d) { return d.y; }));
-
-                svg.select(".x").call(xAxis);
-                svg.select(".y").call(yAxis);
-
-                svg.select(".line").remove();
-
-                svg.append("path")
-                        .datum(data)
-                        .attr("class", "line")
-                        .attr("d", line);
+            };
 
 
-            }
+            main();
 
 
-            var margin = {top: 20, right: 20, bottom: 30, left: 50},
-                    width = 960 - margin.left - margin.right,
-                    height = 500 - margin.top - margin.bottom;
-
-
-            var x = d3.time.scale()
-                    .range([0, width]);
-
-            var y = d3.scale.linear()
-                    .range([height, 0]);
-
-            var xAxis = d3.svg.axis()
-                    .scale(x)
-                    .orient("bottom");
-
-            var yAxis = d3.svg.axis()
-                    .scale(y)
-                    .orient("left");
-
-            svg = d3.select("body").append("svg")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", height + margin.top + margin.bottom)
-                    .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-            svg.append("g")
-                    .attr("class", "x axis")
-                    .attr("transform", "translate(0," + height + ")")
-                    .call(xAxis);
-
-            svg.append("g")
-                    .attr("class", "y axis")
-                    .call(yAxis)
-                    .append("text")
-                    .attr("transform", "rotate(-90)")
-                    .attr("y", 6)
-                    .attr("dy", ".71em")
-                    .style("text-anchor", "end")
-                    .text("Price ($)");
-
-            data = dummy_data(dataSize);
-
-            updateGraph();
 
 
 
