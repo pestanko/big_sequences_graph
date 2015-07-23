@@ -54,10 +54,13 @@ function DemoApp()
 
         for(var key in current_level)
         {
-            if(key == "channels") continue
+            var prop = current_level[key];
+            if(key == "channels") continue;
+            if((typeof prop) == 'function') continue;
             if (current_level.hasOwnProperty(key)) {
                 var tmp = current_level[key];
                 if(tmp == null) return;
+                if(!tmp.channels) continue;
                 console.log("KEY: " + key + " - " + tmp.channels);
                 _this.print(tmp);
             }
@@ -73,9 +76,9 @@ function DemoApp()
         console.log("Tile Holder created: "+ holder);
 
         this.generate(holder);
-        //this.print(holder.tiles);
+        this.print(holder.tiles);
         //this.test_remove(holder);
-        this.test_clear(holder);
+        //this.test_clear(holder);
 
     };
 

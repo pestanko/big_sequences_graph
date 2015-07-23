@@ -13,6 +13,54 @@ function ChannelData(id, data)
 function Tile(channels)
 {
     this.channels = channels | null;
+    this.time_shift = 1;
+    this.time_begin  = 0;
+    this.time_end = 0;
+
+    this.getChannelsList = function()
+    {
+        var ret = [];
+        for(var i = 0 ; i < this.channels.length; i++)
+        {
+            var chan=this.channels[i];
+            ret.push(chan.id);
+        }
+        return ret;
+    };
+
+    this.containsChannel = function(channel)
+    {
+        this.channels.forEach(function(chan){
+            if(chan.id == channel.id) return true;
+        });
+    };
+
+
+    this.updateChannel = function(channel)
+    {
+        var updated = false;
+        this.channels.forEach(function(chan)
+        {
+            if(chan.id == channel.id)
+            {
+                updated = true;
+                chan.data = channel.data;
+            }
+        });
+
+        if(!updated)
+        {
+            this.channels.push(channel);
+        }
+    };
+
+    this.updateAllChannels = function(channels)
+    {
+        channels.forEach(function(chan)
+        {
+            _this.updateChannel(chan);
+        });
+    }
 
 }
 
@@ -53,6 +101,8 @@ function TileHolder()
         //TODO
         tile.channels = tile.channels.concat(channels);
     };
+
+
 
     this.getTile = function(path)
     {
@@ -144,54 +194,6 @@ function AppManager()
         size:255,           // size of tile
         channels: 1
     };
-
-
-
-    this.newTile = function(path, channels)
-    {
-        //TODO
-
-        var tile = new Tile(path, channels)
-    };
-
-
-
-    this.stringPath = function()
-    {
-        var path = "/";
-        path += this.currentPath.forEach(function(elem){ return elem + "/"; });
-        return path;
-    };
-
-    this.zoomOut = function()
-    {
-        this.currentPath.pop();
-    };
-
-    this.zoomIn = function(coord)
-    {
-        // TODO: Calculate where to zoom in.
-    };
-
-    this.moveTileRight()
-    {
-        if(cp.length <= 0)  return;
-
-        var cp = this.currentPath;
-        var last = cp[cp.length - 1];
-        if(last >= this.config.tiles -1) return;
-        cp[cp.length - 1]++;
-    };
-
-    this.moveTileLeft()
-    {
-        if(cp.length <= 0)  return;
-        var cp = this.currentPath;
-        var last = cp[cp.length - 1];
-        if(last <= 0 ) return;
-        cp[cp.length - 1]--;
-    };
-
 
 
 
