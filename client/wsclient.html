@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>WS Client test</title>
-    <script src="js/websocket_handler.js"></script>
+    <script src="js/Application.js"></script>
 </head>
 <body>
     <div id="container">
@@ -34,7 +34,7 @@
             {
                 host = d3.select("ws_host").node().value;
                 console.log("Conneting to: " + host);
-                ws_connect = ws_client(host);
+                ws_connect = new ApplicationManager(host);
             });
         }
 

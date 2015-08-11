@@ -1,6 +1,8 @@
 /**
- * Created by wermington on 22.7.2015.
+ * Created by Peter Stanko on 22.7.2015.
  */
+
+
 
 
 function MatrixHolder()
@@ -26,9 +28,9 @@ function MatrixManager()
     this.holder = new MatrixHolder();
 
     this.level = 0; // current level
-    this.n_levels = 0; // number of levels
-    this.n_tiles = 0; // number of tiles
-    this.size = 255; // size of tile
+    this.n_levels = 0; // pos of levels
+    this.n_tiles = 0; // pos of tiles
+    this.size = 255; // size of pos
 
 
     this.nextLevel = function()

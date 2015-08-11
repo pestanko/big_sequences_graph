@@ -13,7 +13,7 @@
         </script>
 
         <script src="js/d3_handle.js"></script>
-        <script src="js/websocket_handler.js"></script>
+        <script src="js/Application.js"></script>
 
 
         <style>
@@ -49,13 +49,14 @@
         <div id="container">
             <ul>
                 <li>
-                    <button id="genNew">Generate new Random</button>
-                </li><li>
-                    <button id="genDomain">Generate new Domain</button>
-                </li>
-                <li>
-                    <input type="text" value="wss://localhost:10888/" id="ws_host" />
+                    <input type="text" value="ws://localhost:10888/" id="ws_host" />
                     <button id="ws_connect">Connect!</button>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <button id="moveLeft">&lt;&lt;</button>
+                    <button id="moveRight">&gt;&gt;</button>
                 </li>
             </ul>
 
@@ -67,42 +68,28 @@
 
             var main = function() {
 
-                var data = null;
-                var dataSize = 255;
-                var hwnd = new D3_handle();
+                var drawer = new D3_handle();
+                var host = "ws://localhost:10888/";
+                var manager = null;
 
 
-                function dummy_data(length, lower, upper) {
-
-                    lower = lower || 50;
-                    upper = upper || 200;
-                    var range = upper - lower;
-
-
-                    var result = [];
-                    for (var i = 0; i < length; i++) {
-                        var y = Math.floor(Math.random() * range) + lower;
-                        result.push({x: i, y: y});
-                    }
-                    return result;
-                }
-
-                d3.select("#genNew").on("click", function() {
-                    data = dummy_data(dataSize);
-                    hwnd.data = data;
-                    hwnd.updatePath();
-                });
-
-                d3.select("#genDomain").on("click", function()
+                d3.select("#moveRight").on("click", function()
                 {
-                    data = dummy_data(dataSize, 100, 1000);
-                    hwnd.updateData(data);
-                    hwnd.updatePath();
+                    if(!manager) return;
+                    manager.moveTile(+1);
                 });
-                hwnd.data = dummy_data(255);
+                d3.select("#moveLeft").on("click", function()
+                {
+                    if(!manager) return;
+                    manager.moveTile(-1);
+                });
 
-                hwnd.updatePath();
+                d3.select("#ws_connect").on("click", function()
+                {
+                    host = document.getElementById("ws_host").value;
+                    manager = new ApplicationManager(host, drawer);
 
+                });
 
             };
 

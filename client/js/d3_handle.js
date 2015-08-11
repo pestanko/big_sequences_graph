@@ -14,6 +14,7 @@ function D3_handle()
     var _this = this;
     var container = null;
     var path_container = null;
+    var step = width/500;
 
 
     var x = d3.scale.linear()
@@ -54,6 +55,24 @@ function D3_handle()
         .attr("dy", ".71em")
         .style("text-anchor", "end")
         .text("Price ($)");
+
+    this.updateTile = function(data)
+    {
+        if(data == null) {return;}
+        var out_data = new Array(data.length);
+        var x_step = 0;
+        for(var i = 0; i < data.length; i++)
+        {
+
+            out_data[i] = {x: x_step, y: data[i]};
+            x_step += step;
+
+        }
+
+        //console.log(out_data);
+        this.updateData(out_data);
+        this.updatePath();
+    };
 
 
     this.updatePath = function()
