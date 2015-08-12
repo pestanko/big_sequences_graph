@@ -15,6 +15,9 @@ function D3_handle()
     var container = null;
     var path_container = null;
     var step = width/500;
+    this.domain = {};
+    this.domain.x = [0, 900];
+    this.domain.y = [0, 500];
 
 
     var x = d3.scale.linear()
@@ -60,24 +63,30 @@ function D3_handle()
     {
         if(data == null) {return;}
         var out_data = new Array(data.length);
-        var x_step = 0;
+
+
         for(var i = 0; i < data.length; i++)
         {
+            var x_step = 0;
+            out_data[i] = new Array(data[i].length);
 
-            out_data[i] = {x: x_step, y: data[i]};
-            x_step += step;
-
+            for(var j = 0; j < data.length; j++)
+            {
+                out_data[i][j] = {x: x_step, y: data[i][j]};
+                x_step += step;
+            }
         }
 
-        //console.log(out_data);
+
+
         this.updateData(out_data);
-        this.updatePath();
+        this.updatePaths();
     };
 
 
     this.updatePath = function()
     {
-        var data = _this.data;
+        var data = this.data;
         if(data == null) return;
 
 
@@ -86,8 +95,8 @@ function D3_handle()
             .y(function(d) { return y(d.y); });
 
 
-        x.domain(d3.extent(data, function(d) { return d.x; }));
-        y.domain(d3.extent(data, function(d) { return d.y; }));
+        x.domain(this.domain.x);
+        y.domain(this.domain.y);
 
         container.select(".x").call(xAxis);
         container.select(".y").call(yAxis);
@@ -100,6 +109,39 @@ function D3_handle()
             .datum(data)
             .attr("class", "line")
             .attr("d", line);
+    };
+
+
+    this.updatePaths = function()
+    {
+        var data = this.data;
+        if(data == null) return;
+
+
+        var line = d3.svg.line()
+            .x(function(d) { return x(d.x); })
+            .y(function(d) { return y(d.y); });
+
+
+        x.domain(this.domain.x);
+        y.domain(this.domain.y);
+
+        container.select(".x").call(xAxis);
+        container.select(".y").call(yAxis);
+
+
+        var ln  = path_container.select(".line");
+        ln.remove();
+
+        for(var i = 0 ; i < data.length; i++)
+        {
+            path_container.append("path")
+                .datum(data[i])
+                .attr("class", "line")
+                .attr("id", "chan"+i)
+                .attr("d", line);
+        }
+
     };
 
 
