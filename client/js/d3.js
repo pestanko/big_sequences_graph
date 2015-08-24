@@ -6360,8 +6360,8 @@
       }
       for (i = 0; i < m; ++i) {
         o = links[i];
-        if (typeof o.source == "pos") o.source = nodes[o.source];
-        if (typeof o.target == "pos") o.target = nodes[o.target];
+        if (typeof o.source == "index") o.source = nodes[o.source];
+        if (typeof o.target == "index") o.target = nodes[o.target];
         ++o.source.weight;
         ++o.target.weight;
       }
@@ -6835,7 +6835,7 @@
     };
     histogram.bins = function(x) {
       if (!arguments.length) return binner;
-      binner = typeof x === "pos" ? function(range) {
+      binner = typeof x === "index" ? function(range) {
         return d3_layout_histogramBinFixed(range, x);
       } : d3_functor(x);
       return histogram;
@@ -7334,13 +7334,13 @@
       if (!arguments.length) return padding;
       function padFunction(node) {
         var p = x.call(treemap, node, node.depth);
-        return p == null ? d3_layout_treemapPadNull(node) : d3_layout_treemapPad(node, typeof p === "pos" ? [ p, p, p, p ] : p);
+        return p == null ? d3_layout_treemapPadNull(node) : d3_layout_treemapPad(node, typeof p === "index" ? [ p, p, p, p ] : p);
       }
       function padConstant(node) {
         return d3_layout_treemapPad(node, x);
       }
       var type;
-      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "pos" ? (x = [ x, x, x, x ],
+      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "index" ? (x = [ x, x, x, x ],
       padConstant) : padConstant;
       return treemap;
     };
@@ -9395,7 +9395,7 @@
       }), count)[2] ] : !i ? [ d3_time_scaleMilliseconds, d3_scale_linearTickRange(extent, count)[2] ] : methods[target / d3_time_scaleSteps[i - 1] < d3_time_scaleSteps[i] / target ? i - 1 : i];
     }
     scale.nice = function(interval, skip) {
-      var domain = scale.domain(), extent = d3_scaleExtent(domain), method = interval == null ? tickMethod(extent, 10) : typeof interval === "pos" && tickMethod(extent, interval);
+      var domain = scale.domain(), extent = d3_scaleExtent(domain), method = interval == null ? tickMethod(extent, 10) : typeof interval === "index" && tickMethod(extent, interval);
       if (method) interval = method[0], skip = method[1];
       function skipped(date) {
         return !isNaN(date) && !interval.range(date, d3_time_scaleDate(+date + 1), skip).length;
@@ -9412,7 +9412,7 @@
       } : interval));
     };
     scale.ticks = function(interval, skip) {
-      var extent = d3_scaleExtent(scale.domain()), method = interval == null ? tickMethod(extent, 10) : typeof interval === "pos" ? tickMethod(extent, interval) : !interval.range && [ {
+      var extent = d3_scaleExtent(scale.domain()), method = interval == null ? tickMethod(extent, 10) : typeof interval === "index" ? tickMethod(extent, interval) : !interval.range && [ {
         range: interval
       }, skip ];
       if (method) interval = method[0], skip = method[1];

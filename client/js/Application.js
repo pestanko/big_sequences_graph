@@ -1,195 +1,19 @@
 /**
- * Created by wermington on 12.7.2015.
+ * Created by Peter Stanko on 12.7.2015.
+ * @author Peter Stanko
+ * @uco 410338
+ * @licence MIT
  */
 
-
-function TilesHolder()
-{
-    this.levels = {};
-    var _this = this;
-    this.addTile = function(level, index, data)
-    {
-        if(this.levels[level] == null)
-        {
-            this.levels[level] = {};
-        }
-        //console.log("Adding pos [" + level + ", " + index +"]: " + data);
-        this.levels[level][index] = data;
-    };
-
-    this.removeTile = function(level, index)
-    {
-        if(this.levelsp[level] == null) return;
-      this.levels[level][index] = null;
-    };
-
-    this.removeLevel = function(level)
-    {
-        if(this.levels[level] == null) return;
-        this.levels[level] = null;
-    };
-
-    this.getTile = function(level, index)
-    {
-        if(this.levels[level] == null) return null;
-        return this.levels[level][index];
-    };
-
-    this.contains = function(level, index)
-    {
-        return _this.getTile(level, index) != null;
-    };
-};
-
-
-function ActiveHolder(max_levels, tile_size)
-{
-    this.levels = new Array(max_levels);
-    for(var i = 0; i < max_levels; i++)
-    {
-        this.levels[i] = {};
-    }
-    this.tile_size = tile_size;
-    var _this = this;
-    var _tile_add = 0;
-    var _tile_add_lim = 5;
-    var _level_limit = 10;
-
-
-
-    this.addTile = function(level, index, data)
-    {
-        if(level < 0 || level > this.levels.length) {
-            console.log("Level is out of range");
-            return;
-        }
-        _tile_add++;
-
-        if(_tile_add == _tile_add_lim)
-        {
-            console.log("~~~~~~~~~~~~Calling safe remove");
-            this.safeRemove(level, index);
-            _tile_add = 0;
-        }
-
-        console.log("Adding tile at [" + level + ", " + index +"].");
-        this.levels[level][index] = data;
-    };
-
-
-    this.safeRemove = function(level, index)
-    {
-        for( var i = 0 ; i < this.levels.length; i++) {
-
-            var lvl = this.levels[i];
-            if (i - 1 == level) {
-                // PREVIOUS_LEVEL
-                // TODO
-            }
-            else if (i + 1 == level) {
-                // NEXT_LEVEL
-                // TODO
-            } else if (i == level) {
-                var rem_tiles = [];
-                for (var property in lvl) {
-                    if (lvl.hasOwnProperty(property)) {
-                        var prop = parseInt(property);
-                        var limit = (_level_limit / 2);
-                        if (prop <  index -limit || prop > (limit + index)) {
-                            rem_tiles.push(property);
-                            delete lvl[property];
-                        }
-                    }
-                }
-                console.log("Removing tiles at level %d: ", i, rem_tiles);
-            }else
-            {
-                console.log("REMOVING level");
-                this.levels[i] = null;
-            }
-        }
-    };
-    
-    this.nextLevelMove = function (index) {
-        return index * tile_size;
-    };
-
-
-    this.level_size = function(index)
-    {
-        return Math.pow(tile_size, index);
-    };
-
-
-    this.removeTile = function(level, index)
-    {
-        if(this.levels[level] == null) return;
-        var tile = this.getTile(level, index);
-        this.levels[level][index] = null;
-        return tile;
-    };
-
-    this.removeLevel = function(level)
-    {
-        if(this.levels[level] == null) return;
-        this.levels[level] = null;
-    };
-
-    this.getTile = function(level, index)
-    {
-        return this.levels[level][index];
-    };
-
-    this.contains = function(level, index)
-    {
-        return _this.getTile(level, index) != null;
-    };
-};
-
-
-
-/**
- *
- * @param host - remote server with data
- * @param holder -
- * @param drawer - d3 handle to draw data
- * @constructor
- */
-
-function ApplicationManager(host, drawer)
+function ConnectionManager(host)
 {
     this.wsocket = new WebSocket(host);
-    this.current = {level: 0, pos: 0};
-    this.config = {};
-
     var _this = this;
-    this.drawer = drawer;
-
-    this.host = host || "ws://locahost:10888";
-    this.holder = null;
-
-    var open = false, ready = false;
-
-    this.isReady = function()
-    {
-        return ready;
-    };
-
-    this.init_holder = function () {
-        this.holder = new ActiveHolder(this.config.levels, this.config.tile_size);
-    };
-
-    this.isOpen = function()
-    {
-        return open;
-    };
 
     this.wsocket.onopen = function(event)
     {
         console.log("Websocket connected to " + host);
-        open = true;
     };
-
 
     this.wsocket.onmessage = function(event)
     {
@@ -198,19 +22,14 @@ function ApplicationManager(host, drawer)
         switch (message.type)
         {
             case "tile":
-                console.log("Received tile message.");
                 _this.receivedTile(message);
                 break;
 
             case "config":
                 _this.updateConfig(message);
                 console.log("Received config message.", message);
-                ready = true;
-                _this.init_holder();
-                _this.moveTo(_this.current.level, _this.current.pos);
                 break;
         }
-
     };
 
     this.wsocket.onerror = function(event)
@@ -224,10 +43,21 @@ function ApplicationManager(host, drawer)
         console.log("Websocket closed connection")
     };
 
+    this.receivedTile = null;
 
-    this.receivedTile = function(message)
+    this.updateConfig = function(message)
     {
-        this.holder.addTile(message.level, message.index, message.data);
+        window.config = {
+            x_axis: message.x_axis,
+            y_axis: message.y_axis,
+            levels: message.levels,
+            tile_size: message.tile_size,
+            size: message.size,
+            active_window_size: 5,
+            channels: message.channels
+        };
+
+        console.log("Updated config: " + window.config);
     };
 
     this.getTile = function(level, index)
@@ -241,55 +71,317 @@ function ApplicationManager(host, drawer)
         };
 
         this.wsocket.send(JSON.stringify(message));
+    };
+}
 
+
+function WindowLevel(level, lvl_size, connection)
+{
+    this.tiles = new Array(lvl_size);
+    this.index = 0;
+    this.level = level;
+    this.connection = connection;
+    var _this = this;
+
+    this.windowSize = function() {
+        return window.config.active_window_size;
     };
 
-    this.updateConfig = function(message)
+    this.upIndex = function(index)
     {
-
-        this.config = {
-            x_axis: message.x_axis,
-            y_axis: message.y_axis,
-            levels: message.levels,
-            tile_size: message.tile_size,
-            size: message.size
-        };
-
-        console.log("Updated config: " + this.config);
+        if(!index) { index = _this.index ;}
+        var up = index + _this.windowSize();
+        return (up >= lvl_size) ? lvl_size : up;
     };
+
+    this.lowIndex = function (index) {
+        if(!index) { index = _this.index ;}
+        var min = lvl_size - _this.windowSize();
+        return (index > min) ? min : index;
+    };
+
+    this.lowBuffIndex = function(index)
+    {
+        if(!index) { index = this.index ;}
+        var w_size = this.windowSize();
+        var low_size = w_size * 2;
+        var low = this.lowIndex(index) - low_size;
+        return (low < 0) ? 0 : low;
+    };
+
+    this.upBuffIndex = function(index)
+    {
+        if(!index) { index = this.index ;}
+        var w_size = this.windowSize();
+        var up_size = w_size * 2;
+        var up = this.upIndex(index) + up_size;
+        return (up > lvl_size ) ? lvl_size : up;
+    };
+
+    this.addTile = function(index, data)
+    {
+        console.log("Adding tile [%d, %d].", level, index);
+        _this.tiles[index] = data;
+    };
+
+    this.loadBuffer = function()
+    {
+        //noinspection JSUnusedAssignment
+        var i = 0;
+        for(i = this.lowIndex(); i < this.upIndex(); i++)
+        {
+            if(!this.getTile(i))
+            {
+                this.connection.getTile(level, i);
+            }
+        }
+
+        for(i = this.lowBuffIndex(); i < this.lowIndex(); i++)
+        {
+            if(!this.getTile(i))
+            {
+                this.connection.getTile(level, i);
+            }
+        }
+
+        for(i = this.upIndex(); i < this.upBuffIndex(); i++)
+        {
+            if(!this.getTile(i))
+            {
+                this.connection.getTile(level, i);
+            }
+        }
+    };
+
+    this.getWindowData = function(index, callback)
+    {
+        var chan = window.config.channels;
+        var data = new Array(chan);
+
+        for(var c = 0 ; c < chan; c++)
+        {
+            data[c] = [];
+        }
+
+        var interval = setInterval(function() {
+            var i = 0;
+            var tile = null;
+            for(i = 0; i < _this.windowSize(); i++)
+            {
+                var t_index= _this.lowIndex() + i;
+                tile = _this.tiles[t_index];
+                if(!tile)
+                {
+                    console.log("Still no tile: %d.", t_index );
+                    return;
+                }
+            }
+
+            clearInterval(interval);
+            for(i = _this.lowIndex(); i < _this.upIndex(); i++) {
+                tile = _this.tiles[i];
+                if(tile)
+                {
+                    for(var n = 0; n < chan; n++) {
+                        var ch = tile[n];
+                        data[n] = data[n].concat(ch);
+                    }
+                }else
+                {
+                    console.log("Tile fault on index: " + i);
+                }
+            }
+
+            if(callback)
+                callback(data);
+
+            return data;
+        }, 100);
+    };
+
+    this.getTile = function(index)
+    {
+        if(index < 0 || index > lvl_size) return null;
+        return this.tiles[index];
+    };
+
+    this.toTile = function(index)
+    {
+        var direction = (this.index - index);
+        this.moveTile(direction);
+    };
+
+    this.moveTile = function(direction)
+    {
+        var sum = this.index + direction;
+        var oldIndex = this.index;
+        var n_index = 0;
+
+        if(sum < 0)
+        {
+            n_index = 0;
+        }
+        else if(sum >= lvl_size)
+        {
+            n_index = lvl_size - this.windowSize();
+        }
+        else
+        {
+            n_index = sum;
+        }
+
+        this.index = n_index;
+        var del =  { min: 0, max: 0};
+
+
+        if(direction > 0)
+        {
+            del.min = this.lowBuffIndex(oldIndex);
+            del.max = this.lowBuffIndex(n_index);
+        }
+        else
+        {
+            del.min = this.upBuffIndex(n_index);
+            del.max = this.upBuffIndex(oldIndex);
+        }
+
+        console.log("~~~~~~~~~~~~~~~Min vs Max: [%d, %d]", del.min, del.max);
+
+        for(var i = del.min; i < del.max; i++)
+        {
+            console.log("Delete tile [%d, %d]. ", level, this.index);
+            this.tiles[i] = null;
+        }
+
+       this.loadBuffer();
+    };
+}
+
+
+function requireVar(variable, callback)
+{
+    var interval = setInterval(function() {
+        if (variable) {
+            clearInterval(interval);
+            callback();
+        }
+    }, 100);
+}
+
+
+/**
+ *
+ * @param host - remote server with data
+ * @param drawer - d3 handle to draw data
+ * @constructor
+ */
+
+function ApplicationManager(host, drawer)
+{
+    this.connection = new ConnectionManager(host);
+    this.current = {level: 0};
+    window.config = null;
+
+    var _this = this;
+    this.drawer = drawer;
+
+    this.host = host || "ws://locahost:10888";
+    this.levels = null;
+
+    var interval = setInterval(function() {
+        if (window.config) {
+            clearInterval(interval);
+            _this.initLevels();
+            _this.levels[_this.current.level].loadBuffer();
+            _this.draw();
+        }
+    }, 100);
+
+
+    this.initLevels = function()
+    {
+        _this.levels = new Array(window.config.levels + 1);
+        for(var i = 0 ; i < _this.levels.length; i++)
+        {
+            this.levels[i] = new WindowLevel(i, this.levelSize(i), this.connection);
+        }
+    };
+
+    this.levelSize = function(level)
+    {
+        var levels = window.config.levels;
+        var lev = window.config.size/window.config.tile_size;
+        return lev;
+    };
+
+    this.contains = function(level, index)
+    {
+        if(!_this.levels)
+        {
+            console.log("Levels are not init.");
+            return false;
+        }
+        if(_this.levels[level])
+        {
+            return _this.levels[level].getTile(index) != null;
+        }
+        return false;
+    };
+
+    this.addTile = function(level, index, data)
+    {
+        var lvl_size = this.levelSize(level);
+        var lvl = this.levels[level];
+        if(!lvl)
+        {
+            this.levels[level] = new WindowLevel(level, lvl_size);
+        }
+        lvl.addTile(index, data);
+        lvl.requestTiles = this.connection.getTile;
+    };
+
+    this.connection.receivedTile = function(message)
+    {
+        _this.addTile(message.level, message.index, message.data);
+    };
+
 
     this.moveTile = function(dir_num)
     {
-        var number_tiles = this.config.size / this.config.tile_size;
-        var cnum = this.current.pos;
-        var lvl = this.current.level;
-        var sum_res = cnum + dir_num;
 
-        if(sum_res < 0)
-        {
-            console.log("Reached minimum pos ", this.current);
-            return;
-        }
+        this.levels[this.current.level].moveTile(dir_num);
+        this.draw();
+    };
 
-        else if(sum_res >= number_tiles)
-        {
-            console.log("Reached maximum pos ", this.current);
-            return;
-        }
+    this.moveTo = function(level, index)
+    {
+        var tile = this.getTile(level, index);
+        var xax = {
+            begin: index*window.config.tile_size
+        };
+        this.drawer.drawData(tile, xax);
+    };
 
+    this.draw = function()
+    {
 
-        this.current.pos += dir_num;
+        var level = this.levels[this.current.level];
+        level.getWindowData(null, function(win_data){
+                console.log("Drawing Data: ", win_data);
+                var xax = {
+                    begin: level.lowIndex()*window.config.tile_size
+                };
 
-        this.moveTo(this.current.level, this.current.pos);
-
+                _this.drawer.drawData(win_data,xax);
+            });
 
     };
 
-    this.moveTo = function(level, pos)
+    this.getTile = function(level, index)
     {
-        var number_tiles = this.config.size / this.config.tile_size;
-        this.config.levels = 2;
-        if(level >=  this.config.levels)
+        var number_tiles = window.config.size / window.config.tile_size;
+        window.config.levels = 2;
+        if(level >=  window.config.levels)
         {
             console.log("Reached maximum level ", this.current);
             return;
@@ -299,59 +391,32 @@ function ApplicationManager(host, drawer)
             console.log("Reached minimum level ", this.current);
             return;
         }
-        if(pos >= number_tiles)
+        if(index >= number_tiles)
         {
-            console.log("Reached maximum pos ", this.current);
+            console.log("Reached maximum index ", this.current);
             return;
         }
-        else if (pos < 0)
+        else if (index < 0)
         {
-            console.log("Reached minimum pos ", this.current);
+            console.log("Reached minimum index ", this.current);
             return;
         }
         this.current.level = level;
-        this.current.pos = pos;
+        var lvl = this.levels[level];
+        lvl.toTile(index);
 
-        console.log("Current pos ", this.current);
+        console.log("Current index ", this.current);
 
-        var cont = this.holder.contains;
-
-        if(!cont(level, pos))
+        var cont = this.contains;
+        if(!cont(level, index))
         {
-            this.getTile(level, pos);
+            this.connection.getTile(level, index);
         }
-
-        var intvl = setInterval(function() {
-            if (cont(level, pos)) {
-                clearInterval(intvl);
-                //console.log("Ready to draw pos ", _this.current);
-                _this.drawer.updateTile(_this.holder.getTile(level, pos));
-            }
-        }, 100);
-
-
-
-
     };
 
     this.moveLevel = function(dir_lvl, number)
     {
-        var number_tiles = this.config.size / this.config.tile_size;
-        var cnum = this.current.pos;
-        var lvl = this.current.level;
-
-        var lvl_sum = lvl + dir_lvl;
-
-        if(lvl_sum >=  this.config.levels)
-        {
-            console.log("Reached maximum level ", this.current);
-            return;
-        }
-        else if (lvl_sum < 0)
-        {
-            console.log("Reached minimum level ", this.current);
-            return;
-        }
+        var number_tiles = window.config.size / window.config.tile_size;
 
         this.current.level += dir_lvl;
         if(dir_lvl < 0)
@@ -364,22 +429,9 @@ function ApplicationManager(host, drawer)
             //TODO
             while(dir_lvl)
             {
-                this.current.pos = number * number_tiles;
+                this.current.index = number * number_tiles;
             }
         }
-
-
     };
-
-
 };
-
-function test()
-{
-    console.log("Running test...");
-    var tm = new TilesHolder(null);
-    var ws = new ApplicationManager("ws://localhost:10888", tm);
-}
-
-//test();
 

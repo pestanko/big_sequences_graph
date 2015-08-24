@@ -28,9 +28,9 @@ function MatrixManager()
     this.holder = new MatrixHolder();
 
     this.level = 0; // current level
-    this.n_levels = 0; // pos of levels
-    this.n_tiles = 0; // pos of tiles
-    this.size = 255; // size of pos
+    this.n_levels = 0; // index of levels
+    this.n_tiles = 0; // index of tiles
+    this.size = 255; // size of index
 
 
     this.nextLevel = function()

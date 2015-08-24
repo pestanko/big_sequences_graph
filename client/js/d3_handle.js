@@ -41,7 +41,6 @@ function D3_handle()
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     container = svg.append("g").attr("class", "container");
-    path_container = container.append("g").attr("class", "path_container");
 
 
     container.append("g")
@@ -55,39 +54,65 @@ function D3_handle()
         .append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
-        .attr("dy", ".71em")
+        .attr("dy", ".72em")
         .style("text-anchor", "end")
-        .text("Price ($)");
+        .text("Data -- #");
 
-    this.updateTile = function(data)
+    this.drawData = function(data, xaxis)
     {
+        var x_beg = xaxis.begin;
+        var w_size = window.config.active_window_size * window.config.tile_size;
         if(data == null) {return;}
         var out_data = new Array(data.length);
+        var x_step = 0;
+        this.domain.x = [x_beg, x_beg + w_size];
+
 
 
         for(var i = 0; i < data.length; i++)
         {
-            var x_step = 0;
             out_data[i] = new Array(data[i].length);
+            x_step = x_beg;
 
-            for(var j = 0; j < data.length; j++)
+            for(var j = 0; j < data[0].length; j++)
             {
                 out_data[i][j] = {x: x_step, y: data[i][j]};
-                x_step += step;
+                x_step++;
             }
         }
 
 
-
+        console.log("INTERVAL [%d, %d] ", x_beg ,x_step);
         this.updateData(out_data);
-        this.updatePaths();
+        this.updatePaths(x_beg);
+    };
+
+    this.drawGridVertical = function(cont, shift)
+    {
+        var num = window.config.active_window_size;
+        var t_size = window.config.tile_size;
+
+        for(var i = (shift/t_size) + 1; i < (shift/t_size) + num; i++)
+        {
+            var x_coor = i * t_size;
+            cont.append("line")
+                .attr("x1", x(x_coor))  //<<== change your code here
+                .attr("y1", 0)
+                .attr("x2", x(x_coor))  //<<== and here
+                .attr("y2", height)
+                .style("stroke-width", 1)
+                .style("stroke", "#555")
+                .style("fill", "none");
+        }
+
     };
 
 
-    this.updatePath = function()
+    this.updatePaths = function(shift)
     {
         var data = this.data;
         if(data == null) return;
+
 
 
         var line = d3.svg.line()
@@ -101,37 +126,11 @@ function D3_handle()
         container.select(".x").call(xAxis);
         container.select(".y").call(yAxis);
 
+        if(path_container != null)
+            path_container.remove();
 
-        var ln  = path_container.select(".line");
-        ln.remove();
+        path_container = container.append("g").attr("class", "path_container");
 
-        path_container.append("path")
-            .datum(data)
-            .attr("class", "line")
-            .attr("d", line);
-    };
-
-
-    this.updatePaths = function()
-    {
-        var data = this.data;
-        if(data == null) return;
-
-
-        var line = d3.svg.line()
-            .x(function(d) { return x(d.x); })
-            .y(function(d) { return y(d.y); });
-
-
-        x.domain(this.domain.x);
-        y.domain(this.domain.y);
-
-        container.select(".x").call(xAxis);
-        container.select(".y").call(yAxis);
-
-
-        var ln  = path_container.select(".line");
-        ln.remove();
 
         for(var i = 0 ; i < data.length; i++)
         {
@@ -142,9 +141,11 @@ function D3_handle()
                 .attr("d", line);
         }
 
+        this.drawGridVertical(path_container, shift);
+
+
+
     };
-
-
     this.updateData = function(data)
     {
         _this.data = data;
