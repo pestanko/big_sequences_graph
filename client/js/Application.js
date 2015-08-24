@@ -292,10 +292,24 @@ function ApplicationManager(host, drawer)
         if (window.config) {
             clearInterval(interval);
             _this.initLevels();
-            _this.levels[_this.current.level].loadBuffer();
-            _this.draw();
+            _this.drawer.requestWindowSize();
+            _this.calculateWindowSize();
         }
     }, 100);
+
+
+    _this.calculateWindowSize = function(width)
+    {
+        var wc = window.config;
+        width = width | wc.client_width();
+        var t_size = wc.tile_size;
+        var factor = 3;
+        var tiles = Math.floor( width / (factor * t_size) );
+        console.log("Tiles in window: ", tiles);
+        wc.active_window_size = tiles;
+        _this.levels[_this.current.level].loadBuffer();
+        _this.draw();
+    };
 
 
     this.initLevels = function()
@@ -355,11 +369,8 @@ function ApplicationManager(host, drawer)
 
     this.moveTo = function(level, index)
     {
-        var tile = this.getTile(level, index);
-        var xax = {
-            begin: index*window.config.tile_size
-        };
-        this.drawer.drawData(tile, xax);
+        _this.levels[level].toTile(index);
+        this.draw();
     };
 
     this.draw = function()

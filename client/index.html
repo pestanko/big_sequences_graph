@@ -6,14 +6,17 @@
         </title>
 
         <link ref="stylesheet" href="css/layout.css"/>
-        <link ref="stylesheet" href="js/c3/c3.min.css"/>
 
         <script src="js/d3.min.js">
-
         </script>
 
         <script src="js/d3_handle.js"></script>
         <script src="js/Application.js"></script>
+        <script src="js/ElementQueries.js"></script>
+        <script src="js/ResizeSensor.js"></script>
+
+
+
 
 
         <style>
@@ -38,6 +41,11 @@
                 stroke: steelblue;
                 stroke-width: 1.5px;
             }
+            #container
+            {
+                width: 1200px;
+                margin: auto;
+            }
 
         </style>
 
@@ -47,26 +55,33 @@
 
     <body>
         <div id="container">
-            <ul>
-                <li>
-                    <input type="text" value="ws://localhost:10888/" id="ws_host" />
-                    <button id="ws_connect">Connect!</button>
-                </li>
-            </ul>
-            <ul>
-                <li>
-                    <button id="moveLeft">&lt;&lt;</button>
-                    <button id="moveRight">&gt;&gt;</button>
-                </li>
-            </ul>
-            <ul style="float: right">
-                <li>
-                    Level: <input type="number" value="0" id="level"> Tile: <input type="number" value="0" id="index">
-                </li>
-                <li >
-                    <button id="gotopos"> <strong>GO!</strong> </button>
-                </li>
-            </ul>
+            <div id="elems_menu">
+                <ul>
+                    <li>
+                        <input type="text" value="ws://localhost:10888/" id="ws_host" />
+                        <button id="ws_connect">Connect!</button>
+                    </li>
+                </ul>
+                <ul style="float: right">
+                    <li>
+                        Level: <input type="number" value="0" id="level"> Tile: <input type="number" value="0" id="index">
+                    </li>
+                    <li >
+                        <button id="gotopos"> <strong>GO!</strong> </button>
+                    </li>
+                </ul>
+                <ul style="float:left">
+                    <li>
+                        <button id="moveLeft">&lt;&lt;</button>
+                        <button id="moveRight">&gt;&gt;</button>
+                    </li>
+                </ul>
+
+            </div>
+
+            <div id="graph_container" style="width: 100%; height: 600px;">
+
+            </div>
 
         </div>
 
@@ -76,7 +91,8 @@
 
             var main = function() {
 
-                var drawer = new D3_handle();
+                var graph_container = "#graph_container";
+                var drawer = new D3_handle(graph_container);
                 var host = "ws://localhost:10888/";
                 var manager = null;
 
@@ -106,10 +122,30 @@
                     manager.moveTo(level, index);
                 });
 
+                var main_node = d3.select(graph_container).node();
+                main_node.onresize = function() {
+                    console.log("Resize event called!");
+                    drawer.reload();
+                    if(manager)
+                        manager.moveTile(0);
+                };
+
+
+
+
 
                 document.onkeydown =  function checkKey(e) {
 
                     e = e || window.event;
+
+                    if(e.altKey)
+                    {
+                        if(e.keyCode == 67)
+                        {
+                            host = document.getElementById("ws_host").value;
+                            manager = new ApplicationManager(host, drawer);
+                        }
+                    }
 
                     if (e.keyCode == '38') {
                         // up arrow
