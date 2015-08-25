@@ -6,6 +6,9 @@
 function D3_handle(main_container_name) {
     var main_container = d3.select(main_container_name);
     var main_node = main_container.node();
+    this.log = new my_logger();
+
+
 
     function getWidth() {
 
@@ -17,7 +20,7 @@ function D3_handle(main_container_name) {
         return main_node.offsetHeight;
     }
 
-    console.log(main_node.style.width, main_node.style.height);
+    this.log.debug(main_node.style.width, main_node.style.height);
 
     this.requestWindowSize = function () {
         window.config.client_width = getWidth;
@@ -33,8 +36,9 @@ function D3_handle(main_container_name) {
     var xAxis = null;
     var yAxis = null;
     var svg = null;
+    var curr_shift = 0;
 
-    console.log("Window: [%d, %d]", getWidth(), getHeight());
+    this.log.info("[INFO] Window: [%d, %d]", getWidth(), getHeight());
 
     this.data = null;
     var _this = this;
@@ -93,40 +97,64 @@ function D3_handle(main_container_name) {
     };
 
 
+    this.domain_bounds = function(bounds)
+    {
+        if(bounds.start < 0)
+            bounds.start = 0;
+        if(bounds.stop > window.config.size)
+            bounds.stop = window.config.size;
+        this.log.info( "[INFO] BOUNDS: " ,bounds);
+    };
 
-    this.drawData = function (data, xaxis) {
-        var x_beg = xaxis.begin;
-        var w_size = window.config.active_window_size * window.config.tile_size;
+    this.drawData = function (data) {
+
+        if(!window.config) return;
+
+        var tile_size = window.config.tile_size;
+        var x_beg = window.icfg.current.index;
+        var d_size = window.config.size;
+        var levelSize = window.stat.levelSize();
+        var oneTile = d_size / levelSize;
+        var nTile = window.stat.windowSize() * oneTile;
+        var oneStep = oneTile / tile_size;
+        var xb_ts = x_beg * oneTile;
+        var bounds = {start: xb_ts, stop: xb_ts + nTile, step: oneTile};
+        this.log.info("[DEBUG] BOUNDS - BEGIN: " ,bounds);
+
+
+
         if (data == null) {
             return;
         }
         var out_data = new Array(data.length);
         var x_step = 0;
-        this.domain.x = [x_beg, x_beg + w_size];
+        this.domain_bounds(bounds);
+        this.domain.x = [bounds.start, bounds.stop];
 
 
         for (var i = 0; i < data.length; i++) {
             out_data[i] = new Array(data[i].length);
-            x_step = x_beg;
+            x_step = xb_ts;
 
             for (var j = 0; j < data[0].length; j++) {
                 out_data[i][j] = {x: x_step, y: data[i][j]};
-                x_step++;
+                x_step+=oneStep;
             }
         }
 
 
-        console.log("INTERVAL [%d, %d] ", x_beg, x_step);
+        this.log.info("[INFO] INTERVAL [%d, %d] ", xb_ts, x_step);
         this.updateData(out_data);
-        this.updatePaths(x_beg);
+        this.updatePaths(bounds);
     };
 
-    this.drawGridVertical = function (cont, shift) {
-        var num = window.config.active_window_size;
-        var t_size = window.config.tile_size;
+    this.drawGridVertical = function (cont,bounds) {
+        var start = bounds.start;
+        var stop = bounds.stop;
 
-        for (var i = (shift / t_size) + 1; i <= (shift / t_size) + num; i++) {
-            var x_coor = _this.x(i * t_size);
+
+        for (var i = start; i <= stop; i+= bounds.step) {
+            var x_coor = _this.x(i);
             cont.append("line")
                 .attr("x1", x_coor)  //<<== change your code here
                 .attr("y1", 0)
@@ -139,8 +167,41 @@ function D3_handle(main_container_name) {
 
     };
 
+    this.updateSelectLine = function(ix)
+    {
+        this.drawSelectLine(path_container, curr_shift, ix);
+    };
 
-    this.updatePaths = function (shift) {
+
+    this.drawSelectLine = function(cont, shift ,x_pos)
+    {
+        var sel_line = d3.select("#selectLine");
+        if(sel_line)
+            sel_line.remove();
+        x_pos = x_pos | 0;
+        shift = shift | curr_shift;
+        curr_shift = shift;
+        var x_coor = (x_pos);
+        var line = cont.append("line")
+            .attr("id", "selectLine")
+            .attr("x1", x_coor)  //<<== change your code here
+            .attr("y1", 0)
+            .attr("x2", (x_coor))  //<<== and here
+            .attr("y2", height)
+            .style("stroke-width", 1)
+            .style("stroke", "#F00")
+            .style("fill", "none");
+        return line;
+    };
+
+    this.getSelectX = function(ix)
+    {
+        var invert = this.x.invert(ix + curr_shift);
+        return invert;
+    };
+
+
+    this.updatePaths = function (bounds) {
         var data = this.data;
         if (data == null) return;
 
@@ -174,9 +235,9 @@ function D3_handle(main_container_name) {
                 .attr("d", line);
         }
 
-        this.drawGridVertical(path_container, shift);
+        this.drawGridVertical(path_container, bounds);
 
-
+        //this.drawSelectLine(path_container, shift);
     };
     this.updateData = function (data) {
         _this.data = data;

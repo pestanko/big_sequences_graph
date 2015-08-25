@@ -8,12 +8,12 @@
 function MatrixHolder()
 {
     /**
-     * Holds in levels minimal values for channels
+     * Holds in levels_num minimal values for channels
      * @type {Array}
      */
     this.minDataLevels = [];
     /**
-     * Holds in levels maximal values for channels
+     * Holds in levels_num maximal values for channels
      * @type {Array}
      */
     this.maxDataLevels = [];
@@ -28,7 +28,7 @@ function MatrixManager()
     this.holder = new MatrixHolder();
 
     this.level = 0; // current level
-    this.n_levels = 0; // index of levels
+    this.n_levels = 0; // index of levels_num
     this.n_tiles = 0; // index of tiles
     this.size = 255; // size of index
 
