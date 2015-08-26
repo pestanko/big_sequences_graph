@@ -93,6 +93,12 @@
 
         <script>
 
+
+            function createButtons(container)
+            {
+            };
+
+
             var main = function() {
 
                 var graph_container = "#graph_container";
@@ -104,6 +110,29 @@
                 var _this = this;
                 this.selected = null;
 
+                function change_width(num)
+                {
+                    var w = parseInt(main_graph.style.width);
+                    console.log("WIDTH: %d", w);
+                    main_graph.style.width = (w+num) + "px";
+                    console.log("Resize event called!");
+                    drawer.reload();
+                    if(manager)
+                        manager.moveTile(0);
+                }
+
+                d3.select("#sizeInc").on("click", function()
+                {
+                    var inc = 50;
+                    change_width(inc);
+
+                });
+
+                d3.select("#sizeDec").on("click", function()
+                {
+                    var dec = -50;
+                    change_width(dec)
+                });
 
                 d3.select("#moveRight").on("click", function()
                 {

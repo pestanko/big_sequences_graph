@@ -33,8 +33,8 @@ function my_logger()
     };
     //this.disabled.error = 1;
     //this.disabled.warning = 1;
-    this.disabled.info = 1;
-    this.disabled.debug = 1;
+    //this.disabled.info = 1;
+    //this.disabled.debug = 1;
 
 
 }
@@ -43,6 +43,7 @@ function my_logger()
 window.icfg =
 {
     current: {level: 0, index: 0},
+    factor: 6,
 
 };
 
@@ -255,16 +256,27 @@ function WindowLevel(level, connection)
         var chan = window.config.channels;
         var data = new Array(chan);
 
-        for(var c = 0 ; c < chan; c++)
-        {
-            data[c] = [];
+        for(var n = 0; n < chan; n++) { // PRECHADZAJ CHANELLY
+            if(_this.level == (window.config.levels - 1))
+            {
+                //RAW_DATA
+                data[n] = [];
+            }else{
+                //NO_RAW_DATA
+                data[n] = new Array(2);
+                data[n][0] = [];
+                data[n][1] = [];
+            }
         }
+
+
         var treshold = 20;
 
 
         var interval = setInterval(function() {
             var i = 0;
             var tile = null;
+
             for(i = 0; i < _this.windowSize(); i++)
             {
                 var t_index= _this.lowIndex() + i;
@@ -276,14 +288,25 @@ function WindowLevel(level, connection)
             }
 
             clearInterval(interval);
-            for(i = _this.lowIndex(); i < _this.upIndex(); i++) {
+            for(i = _this.lowIndex(); i < _this.upIndex(); i++) { // PRECHADZAJ TILES
                 tile = _this.tiles[i];
                 if(tile)
                 {
-                    for(var n = 0; n < chan; n++) {
+
+                    for(var n = 0; n < chan; n++) { // PRECHADZAJ CHANELLY
                         var ch = tile[n];
-                        data[n] = data[n].concat(ch);
+                        if(_this.level == (window.config.levels - 1))
+                        {
+                            //RAW_DATA
+                            data[n] = data[n].concat(ch);
+                        }else{
+                            //NO_RAW_DATA
+                            data[n][0] = data[n][0].concat(ch[0]); // MIN
+                            data[n][1] = data[n][1].concat(ch[1]); // MAX
+                        }
                     }
+
+
                 }else
                 {
                     _this.log.error("[ERROR] Tile fault on index: " + i);
@@ -415,8 +438,7 @@ function ApplicationManager(host, drawer)
         var wc = window.config;
         width = width | wc.client_width();
         var t_size = wc.tile_size;
-        var factor = 3;
-        var tiles = Math.floor( width / (factor * t_size) );
+        var tiles = Math.floor( width / (window.icfg.factor * t_size) );
         _this.log.debug("[DEBUG] Tiles in window: ", tiles);
         wc.active_window_size = tiles;
         _this.levels[_this.current.level].loadBuffer();

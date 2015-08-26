@@ -1,0 +1,19 @@
+{
+    "main_script": "big_graph.js",
+    "icon": "big_graph.webp",
+    "width":  1800,
+    "height": 800,
+    "resize": "free",
+    "dependencies": [
+        "js/d3.min.js",
+        "js/d3_handle.js",
+        "js/Application.js"
+    ],
+
+    "title": "HDR5 - Graphs",
+    "version": "0.0.1-A",
+    "description": "Show Big HDR5 graphs",
+    "keywords": [ "hdr5", "graphs", "big" ],
+    "author": "Peter Stanko <stanko@mail.muni.cz>",
+    "license": "SAGE2-Software-License"
+}

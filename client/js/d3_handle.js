@@ -51,10 +51,12 @@ function D3_handle(main_container_name) {
 
     this.reload = function () {
 
+        var cont = d3.select(main_container_name);
 
-        if (svg)
+        if (cont)
         {
-            svg.remove();
+            var s = cont.select("svg");
+            if(s) s.remove();
         }
 
         this.x = d3.scale.linear()
@@ -115,8 +117,8 @@ function D3_handle(main_container_name) {
         var d_size = window.config.size;
         var levelSize = window.stat.levelSize();
         var oneTile = d_size / levelSize;
-        var nTile = window.stat.windowSize() * oneTile;
-        var oneStep = oneTile / tile_size;
+        var windowSize = window.stat.windowSize();
+        var nTile = windowSize * oneTile;
         var xb_ts = x_beg * oneTile;
         var bounds = {start: xb_ts, stop: xb_ts + nTile, step: oneTile};
         this.log.info("[DEBUG] BOUNDS - BEGIN: " ,bounds);
@@ -126,26 +128,77 @@ function D3_handle(main_container_name) {
         if (data == null) {
             return;
         }
-        var out_data = new Array(data.length);
-        var x_step = 0;
+
+        var out_data = null;
+
+        if(window.icfg.current.level == window.config.levels - 1)
+        {
+            this.log.info("[INFO] Drawing Raw data.");
+            out_data = this.handleRaw(data, bounds);
+        }else
+        {
+            this.log.info("[INFO] Drawing levels data.");
+            out_data = this.handleLevels(data, bounds);
+
+        }
+
         this.domain_bounds(bounds);
         this.domain.x = [bounds.start, bounds.stop];
 
+        this.updateData(out_data);
+        this.updatePaths(bounds);
+    };
+    
+    
+    this.handleRaw = function(data, bounds)
+    {
+        var tile_size = window.config.tile_size;
+        var d_size = window.config.size;
+        var levelSize = window.stat.levelSize();
+        var oneTile = d_size / levelSize;
+        var oneStep = oneTile / tile_size;
+        var out_data = new Array(data.length);
+        var x_step = 0;
 
-        for (var i = 0; i < data.length; i++) {
+        for (var i = 0; i < data.length; i++) { // channels
             out_data[i] = new Array(data[i].length);
-            x_step = xb_ts;
+            x_step = bounds.start;
 
-            for (var j = 0; j < data[0].length; j++) {
+            for (var j = 0; j < data[0].length; j++) { // data
                 out_data[i][j] = {x: x_step, y: data[i][j]};
                 x_step+=oneStep;
             }
         }
+        this.log.info("[INFO] INTERVAL [%d, %d] ", bounds.start, x_step);
 
+        return out_data;
+    };
+    
+    this.handleLevels = function (data, bounds) {
+        var out_data = new Array(data.length);
+        var x_step = 0;
+        var tile_size = window.config.tile_size;
+        var d_size = window.config.size;
+        var levelSize = window.stat.levelSize();
+        var oneTile = d_size / levelSize;
+        var oneStep = oneTile / tile_size;
+        var oneStepHalf = oneStep / 2;
 
-        this.log.info("[INFO] INTERVAL [%d, %d] ", xb_ts, x_step);
-        this.updateData(out_data);
-        this.updatePaths(bounds);
+        for (var i = 0; i < data.length; i++) { // channels
+            var len = data[i].length * 2;
+            out_data[i] = new Array(len);
+            x_step = bounds.start;
+            var chan = data[i];
+            for (var j = 0, k = 0; j < chan[0].length; j++, k+=2) { // data
+
+                out_data[i][k] = {x: x_step, y: chan[0][j]}; // MIN
+                x_step+=oneStepHalf;
+                out_data[i][k + 1] = {x: x_step, y: chan[1][j]}; // MAX
+                x_step+=oneStepHalf;
+            }
+        }
+        this.log.info("[INFO] INTERVAL [%d, %d] ", bounds.start, x_step);
+        return out_data;
     };
 
     this.drawGridVertical = function (cont,bounds) {
@@ -240,6 +293,10 @@ function D3_handle(main_container_name) {
         //this.drawSelectLine(path_container, shift);
     };
     this.updateData = function (data) {
+        if(data == null)
+        {
+            this.log.warning("[WARNING]: Update data - No data");
+        }
         _this.data = data;
     };
 
