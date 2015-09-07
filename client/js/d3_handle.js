@@ -6,8 +6,32 @@
 function D3_handle(main_container_name) {
     var main_container = d3.select(main_container_name);
     var main_node = main_container.node();
-    this.log = new my_logger();
+    this.log = new SimpleLogger();
+    var bounds = null;
 
+    var min_line = d3.svg.line()
+        .x(function (d) {
+            return _this.x(d[0].x);
+        })
+        .y(function (d) {
+            return _this.y(d[0].y);
+        });
+
+    var max_line = d3.svg.line()
+        .x(function (d) {
+            return _this.x(d[1].x);
+        })
+        .y(function (d) {
+            return _this.y(d[1].y);
+        });
+
+    var line = d3.svg.line()
+        .x(function (d) {
+            return _this.x(d.x);
+        })
+        .y(function (d) {
+            return _this.y(d.y);
+        });
 
 
     function getWidth() {
@@ -44,9 +68,9 @@ function D3_handle(main_container_name) {
     var _this = this;
     var path_container = null;
     var container = null;
-    this.domain = {};
+    this.domain = window.icfg.domain;
     this.domain.x = [0, 900];
-    this.domain.y = [0, 500];
+    this.domain.y = [0, 2000];
 
 
     this.reload = function () {
@@ -96,6 +120,8 @@ function D3_handle(main_container_name) {
             .attr("dy", ".72em")
             .style("text-anchor", "end")
             .text("Data -- #");
+
+        this.updatePaths();
     };
 
 
@@ -115,12 +141,12 @@ function D3_handle(main_container_name) {
         var tile_size = window.config.tile_size;
         var x_beg = window.icfg.current.index;
         var d_size = window.config.size;
-        var levelSize = window.stat.levelSize();
+        var levelSize = window.stat.levelTiles();
         var oneTile = d_size / levelSize;
         var windowSize = window.stat.windowSize();
         var nTile = windowSize * oneTile;
         var xb_ts = x_beg * oneTile;
-        var bounds = {start: xb_ts, stop: xb_ts + nTile, step: oneTile};
+        bounds = {start: xb_ts, stop: xb_ts + nTile, step: oneTile};
         this.log.info("[DEBUG] BOUNDS - BEGIN: " ,bounds);
 
 
@@ -133,11 +159,11 @@ function D3_handle(main_container_name) {
 
         if(window.icfg.current.level == window.config.levels - 1)
         {
-            this.log.info("[INFO] Drawing Raw data.");
+            this.log.info("[INFO] Computing Raw data.");
             out_data = this.handleRaw(data, bounds);
         }else
         {
-            this.log.info("[INFO] Drawing levels data.");
+            this.log.info("[INFO] Computing levels data.");
             out_data = this.handleLevels(data, bounds);
 
         }
@@ -154,7 +180,7 @@ function D3_handle(main_container_name) {
     {
         var tile_size = window.config.tile_size;
         var d_size = window.config.size;
-        var levelSize = window.stat.levelSize();
+        var levelSize = window.stat.levelTiles();
         var oneTile = d_size / levelSize;
         var oneStep = oneTile / tile_size;
         var out_data = new Array(data.length);
@@ -179,21 +205,24 @@ function D3_handle(main_container_name) {
         var x_step = 0;
         var tile_size = window.config.tile_size;
         var d_size = window.config.size;
-        var levelSize = window.stat.levelSize();
+        var levelSize = window.stat.levelTiles();
         var oneTile = d_size / levelSize;
         var oneStep = oneTile / tile_size;
         var oneStepHalf = oneStep / 2;
 
         for (var i = 0; i < data.length; i++) { // channels
-            var len = data[i].length * 2;
-            out_data[i] = new Array(len);
+            var len = data[i][0].length; // length of channel
+            out_data[i] = new Array(len); // this should be 100
+            for (var j = 0; j < len; j++) {
+                out_data[i][j] = new Array(2);
+            }
+
             x_step = bounds.start;
             var chan = data[i];
-            for (var j = 0, k = 0; j < chan[0].length; j++, k+=2) { // data
-
-                out_data[i][k] = {x: x_step, y: chan[0][j]}; // MIN
+            for (var j = 0; j < chan[0].length; j++) { // data
+                out_data[i][j][0] = {x: x_step, y: chan[0][j]}; // MIN
                 x_step+=oneStepHalf;
-                out_data[i][k + 1] = {x: x_step, y: chan[1][j]}; // MAX
+                out_data[i][j][1] = {x: x_step, y: chan[1][j]}; // MAX
                 x_step+=oneStepHalf;
             }
         }
@@ -201,7 +230,8 @@ function D3_handle(main_container_name) {
         return out_data;
     };
 
-    this.drawGridVertical = function (cont,bounds) {
+    this.drawGridVertical = function (cont) {
+
         var start = bounds.start;
         var stop = bounds.stop;
 
@@ -254,19 +284,84 @@ function D3_handle(main_container_name) {
     };
 
 
-    this.updatePaths = function (bounds) {
+    this.drawMinMax = function (data, chan) {
+
+        var cls = "line";
+
+        path_container.append("path")
+            .datum(data)
+            .attr("class", cls)
+            .attr("id", "chan" + chan)
+            .attr("d", min_line);
+
+
+        path_container.append("path")
+            .datum(data)
+            .attr("class", cls)
+            .attr("id", "chan" + chan)
+            .attr("d", min_line);
+
+
+        path_container.append("path")
+            .datum(data)
+            .attr("class", cls)
+            .attr("id", "chan" + chan)
+            .attr("d", max_line);
+
+        var area_mm = d3.svg.area()
+            .x(max_line.x())
+            .y0(min_line.y())
+            .y1(max_line.y());
+
+
+        path_container.append("path")
+            .datum(data)
+            .attr("class", "area" + chan)
+            .attr("d", area_mm)
+            .attr("fill", "steelblue")
+            .style("opacity", "0.3");
+
+    };
+
+
+    this.scaleY = function(dir)
+    {
+        var min = this.domain.y[0];
+        var max = this.domain.y[1];
+        this.domain.y = [ min - dir, max + dir ];
+        this.reload();
+    };
+
+    this.scaleX = function(dir)
+    {
+        var min = this.domain.x[0];
+        var max = this.domain.x[1];
+        this.domain.x = [ min - dir, max + dir ];
+        this.reload();
+    };
+
+
+
+    this.drawPath = function(data, chan , mm)
+    {
+        var cls = "line";
+        if(mm)
+        {
+            cls += " "+mm;
+        }
+
+        path_container.append("path")
+            .datum(data)
+            .attr("class", cls)
+            .attr("id", "chan" + chan)
+            .attr("d", line);
+        return line;
+    };
+
+
+    this.updatePaths = function () {
         var data = this.data;
         if (data == null) return;
-
-
-        var line = d3.svg.line()
-            .x(function (d) {
-                return _this.x(d.x);
-            })
-            .y(function (d) {
-                return _this.y(d.y);
-            });
-
 
         _this.x.domain(this.domain.x);
         _this.y.domain(this.domain.y);
@@ -281,17 +376,22 @@ function D3_handle(main_container_name) {
 
 
         for (var i = 0; i < data.length; i++) {
-            path_container.append("path")
-                .datum(data[i])
-                .attr("class", "line")
-                .attr("id", "chan" + i)
-                .attr("d", line);
+            if(window.icfg.current.level == window.config.levels - 1)
+            {
+                this.log.info("[INFO] Drawing Raw data.");
+                this.drawPath(data[i], i);
+            }else
+            {
+                this.log.info("[INFO] Drawing levels data.");
+                this.drawMinMax(data[i], i);
+            }
         }
 
-        this.drawGridVertical(path_container, bounds);
-
+        this.drawGridVertical(path_container);
         //this.drawSelectLine(path_container, shift);
     };
+
+
     this.updateData = function (data) {
         if(data == null)
         {

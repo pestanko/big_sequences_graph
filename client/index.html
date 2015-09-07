@@ -46,6 +46,7 @@
 
 
 
+
         </style>
 
 
@@ -197,31 +198,43 @@
                 }
 
 
-                main_graph.onmousemove = function(e)
+                var prev_mouseX = null, prev_mouseY = null;
+                var clicked = false;
+
+                window.onmousemove = function(e)
                 {
                     if(!window.config) return;
-                    if(stop) return;
-                    var svg = d3.select(".path_container");
-                    if(!svg) return;
-                    var w_pos = getCoords(svg.node());
-                    var x = e.clientX;
+                    if(clicked == true)
+                    {
+                        var diff_y = prev_mouseY - e.clientY;
+                        var diff_x = prev_mouseX - e.clientX;
+                        prev_mouseY = e.clientY;
+                        prev_mouseX = e.clientX;
+                        drawer.scaleY(diff_y*3);
+                        drawer.scaleX(diff_x*3);
+                    }
 
-                    var ix = x - w_pos.left;
-
-                    drawer.updateSelectLine(ix);
                 };
 
                 main_graph.onclick = function(e)
                 {
                     if(!window.config) return;
-                    stop = !stop;
-
+                    if(clicked)
+                    {
+                        clicked = false;
+                        prev_mouseX = null;
+                        prev_mouseY = null;
+                    }else{
+                        clicked = true;
+                        prev_mouseX = e.clientX;
+                        prev_mouseY = e.clientY;
+                    }
                     var svg = d3.select(".path_container");
                     var w_pos = getCoords(svg.node());
                     var x = e.clientX;
                     var ix = drawer.getSelectX(x - w_pos.left);
                     console.log("ix - drawing: %d", ix );
-                    drawer.updateSelectLine(x - w_pos.left);
+                    //drawer.updateSelectLine(x - w_pos.left);
 
                     _this.selected = ix;
                 };
