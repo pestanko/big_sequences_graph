@@ -1,14 +1,16 @@
+#! /usr/bin/env python3
+
 import h5py
 import numpy as np
 
 
-def create_minmax(h5File, h5Path):
+def create_minmax(filepath, h5path):
     base = 10
-    f = h5py.File(h5File, 'a')
-    indset = f[h5Path]
+    f = h5py.File(filepath, 'a')
+    index_set = f[h5path]
 
-    shape = indset.shape
-    dtype = indset.dtype
+    shape = index_set.shape
+    dtype = index_set.dtype
     n_chan = shape[1]
     n_sample = shape[0]
     base_log = int(np.log10(n_sample)) - 2
@@ -23,8 +25,8 @@ def create_minmax(h5File, h5Path):
     g_max = gh.create_group('h_max')
 
     n_hsamp = n_sample
-    d_min0 = indset
-    d_max0 = indset
+    d_min0 = index_set
+    d_max0 = index_set
 
     for l in range(n_levels):
         n_hsamp = int(np.ceil(n_hsamp / base)
