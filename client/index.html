@@ -7,11 +7,15 @@
 
         <link ref="stylesheet" href="css/layout.css"/>
 
-        <script src="js/d3.min.js">
-        </script>
-
-        <script src="js/d3_handle.js"></script>
+        <script src="js/d3.min.js"></script>
+        <script src="js/Helpers.js"></script>
+        <script src="js/ConnectionManager.js"></script>
+        <script src="js/Level.js"></script>
+        <script src="js/D3Drawer.js"></script>
+        <script src="js/Holder.js"></script>
+        <script src="js/ConnectionManager.js"></script>
         <script src="js/Application.js"></script>
+
 
 
         <style>
@@ -104,7 +108,7 @@
 
                 var graph_container = "#graph_container";
                 var main_graph = document.getElementById("graph_container");
-                var drawer = new D3_handle(graph_container);
+                var drawer = new D3Drawer(graph_container);
                 var host = "ws://localhost:10888/";
                 var manager = null;
                 var stop = true;
