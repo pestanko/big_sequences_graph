@@ -9,10 +9,11 @@
  */
 window.icfg =
 {
-    current: {level: 0, index: 0},
-    factor: 6,
+    current: {level: 0},
+    factor: 3,
     domain: {x : [0,1000], y: [0,2000]},
-    threshold: 20
+    threshold: 20,
+    position: {beg: 0, end: 0}
 };
 
 
@@ -39,7 +40,7 @@ window.stat =
     levelTiles:function(lvl)
     {
         if(!window.config) return 0;
-        lvl = lvl | window.icfg.current.level;
+        lvl = lvl || window.icfg.current.level;
         var max = window.config.levels - 1;
         var diff = max - lvl;
 
@@ -59,9 +60,9 @@ window.stat =
     convertToTile: function(position, curr_lvl)
     {
         if(!window.config) return 0;
-        curr_lvl = curr_lvl | window.icfg.current.level;
+        curr_lvl = curr_lvl || window.icfg.current.level;
         var size = window.config.size;
-        var lvl_tiles = this.levelSize(curr_lvl);
+        var lvl_tiles = this.levelTiles(curr_lvl);
         console.log("TILES: %d, diff: %d", lvl_tiles, size/lvl_tiles);
 
         var tile_pos = position / (size / lvl_tiles);
@@ -71,7 +72,9 @@ window.stat =
     tileToPosition: function(lvl, index)
     {
         if(!window.config) return 0;
-
+        var max = window.config.levels;
+        var diff = max - lvl;
+        return (Math.pow(window.config.tile_size, diff)) * index;
     },
 
     domainXSize : function()

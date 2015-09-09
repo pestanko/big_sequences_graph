@@ -32,6 +32,7 @@ function D3Drawer(main_container_name) {
     this.domain.x = [0, 900];
     this.domain.y = [0, 2000];
 
+    this.pos = window.icfg.position;
 
 
     // Init
@@ -132,50 +133,104 @@ function D3Drawer(main_container_name) {
 
 
     this.drawLevel = function (level) {
-        level = level | this.currentLevel;
+        level = level || this.currentLevel;
 
         if(!level) return;
 
-        var thresh_count = 0;
-
-        this.currentLevel = level;
+        this.domain.x = level.toDomainX();
 
         _this.x.domain(this.domain.x);
         _this.y.domain(this.domain.y);
 
+        window.icfg.position.beg = this.domain.x[0];
+        window.icfg.position.end = this.domain.y[1];
+
+
+        this.currentLevel = level;
+
         container.select(".x").call(xAxis);
         container.select(".y").call(yAxis);
+
+        this.refreshLevel(level);
+
+    };
+
+
+    this.refreshLevel = function (level) {
+
+        level = level || this.currentLevel;
+
+        if(!level) return;
+
+
+        var interval = setInterval(function(){
+
+            var ready = true;
+            for(var i = level.lowIndex(); i < level.upIndex(); i++)
+            {
+                var tile = level.tiles[i];
+                if(!tile)
+                {
+                    ready = false;
+                    return;
+                }
+            }
+            if(ready)
+            {
+                clearInterval(interval);
+               _this.redrawLevel(level);
+            }
+
+        }, 100);
+    };
+
+    this.taker = function(first, last)
+    {
+        if(first == null || last == null) return null;
+
+
+        var size = first[0].length;
+        var last_elem = new Array(first.length); // Ready for channels
+        for(var i = 0 ; i < first.length; i++)
+        {
+            last_elem[i] = new Array(2);
+            last_elem[i][0] = first[i][size - 1];
+            last_elem[i][1] = last[i][0];
+
+        }
+
+
+        return last_elem ;
+    };
+
+
+    this.redrawLevel = function(level)
+    {
+        level = level || this.currentLevel;
+
+
 
         if (path_container != null)
             path_container.remove();
 
         path_container = container.append("g").attr("class", "path_container");
 
-        for(var i = level.lowIndex(); i < level.upIndex(); i++)
-        {
-            var interval = setInterval(function()
+
+        for (var i = level.lowIndex(); i < level.upIndex(); i++) {
+            var tile = level.tiles[i];
+            _this.drawTile(tile);
+            var taker = this.taker(level.tiles[i], level.tiles[i+1]);
+            if(taker)
             {
-                var index = i;
-                if (window.icfg.threshold <= thresh_count++) {
-                    clearInterval(interval);
-                    _this.log.warning("[WARNING] - Timeout @ [%d, %d]", level.level, index);
-                    return;
-                }
-
-
-                var tile = level.tiles[i];
-                if(tile) {
-                    clearInterval(interval);
-                    _this.drawTile(level.tiles[index]);
-                }
-            }, 50);
+                //console.log(" [REMOVE] TAKER: ", taker);
+                _this.drawTile(taker);
+            }
         }
 
     };
 
     this.drawTile = function (tile) {
         if(!tile) return;
-
         tile.forEach(function(channel, index){
             _this.drawChannel(channel, index);
         });
@@ -195,7 +250,6 @@ function D3Drawer(main_container_name) {
         {
             _this.drawMinMax(channel, index);
         }
-
     };
 
 
@@ -231,8 +285,8 @@ function D3Drawer(main_container_name) {
         var sel_line = d3.select("#selectLine");
         if(sel_line)
             sel_line.remove();
-        x_pos = x_pos | 0;
-        shift = shift | curr_shift;
+        x_pos = x_pos || 0;
+        shift = shift || curr_shift;
         curr_shift = shift;
         var x_coor = (x_pos);
         var line = cont.append("line")
@@ -290,7 +344,6 @@ function D3Drawer(main_container_name) {
             .attr("d", area_mm)
             .attr("fill", "steelblue")
             .style("opacity", "0.3");
-
     };
 
 
@@ -298,16 +351,14 @@ function D3Drawer(main_container_name) {
     {
         var min = this.domain.y[0];
         var max = this.domain.y[1];
-        this.domain.y = [ min - dir, max + dir ];
-        this.reload();
+        this.domain.y = [ min + dir, max - dir ];
+        this.drawLevel();
     };
 
     this.scaleX = function(dir)
     {
-        var min = this.domain.x[0];
-        var max = this.domain.x[1];
-        this.domain.x = [ min - dir, max + dir ];
-        this.reload();
+        this.currentLevel.scale(dir/100);
+        this.drawLevel();
     };
 
 

@@ -79,6 +79,12 @@
                         <button id="moveLeft">&lt;&lt;</button>
                         <button id="moveRight">&gt;&gt;</button>
                     </li>
+
+                    <li>
+                        Scale:
+                        <button id="scaleUp">+</button>
+                        <button id="scaleDown">-</button>
+                    </li>
                     <li>
                         <button id="moveUp">UP</button>
                     </li><li>
@@ -99,9 +105,6 @@
         <script>
 
 
-            function createButtons(container)
-            {
-            };
 
 
             var main = function() {
@@ -142,12 +145,12 @@
                 d3.select("#moveRight").on("click", function()
                 {
                     if(!manager) return;
-                    _this.move(0, +1);
+                    _this.moveByTile(0, +1);
                 });
                 d3.select("#moveLeft").on("click", function()
                 {
                     if(!manager) return;
-                    _this.move(0, -1);
+                    _this.moveByTile(0, -1);
                 });
 
                 d3.select("#moveUp").on("click", function()
@@ -160,6 +163,19 @@
                     if(!manager) return;
                     _this.stepLvl(-1);
                 });
+
+                d3.select("#scaleUp").on("click", function()
+                {
+                    if(!manager) return;
+                    drawer.scaleX(1000);
+                });
+                d3.select("#scaleDown").on("click", function()
+                {
+                    if(!manager) return;
+                    _this.stepLvl(-1);
+                    drawer.scaleX(-1000);
+                });
+
 
                 d3.select("#ws_connect").on("click", function()
                 {
@@ -220,19 +236,29 @@
 
                 };
 
-                main_graph.onclick = function(e)
+                main_graph.onmousedown = function(e)
                 {
                     if(!window.config) return;
-                    if(clicked)
-                    {
-                        clicked = false;
-                        prev_mouseX = null;
-                        prev_mouseY = null;
-                    }else{
                         clicked = true;
                         prev_mouseX = e.clientX;
                         prev_mouseY = e.clientY;
-                    }
+
+                };
+
+                main_graph.onmouseup = function (e) {
+                    if(!window.config) return;
+                    clicked = false;
+                    prev_mouseX = null;
+                    prev_mouseY = null;
+
+                };
+
+
+
+
+                main_graph.onclick = function(e)
+                {
+
                     var svg = d3.select(".path_container");
                     var w_pos = getCoords(svg.node());
                     var x = e.clientX;
@@ -243,7 +269,7 @@
                     _this.selected = ix;
                 };
 
-                this.move = function(lvl_dir, ind_dir)
+                this.moveByTile = function(lvl_dir, ind_dir)
                 {
                     if(!manager) return;
                     var level = document.getElementById("level");
@@ -252,6 +278,17 @@
                     level.value = window.icfg.current.level;
                     index.value = window.icfg.current.index;
                 };
+
+                this.moveByPos = function(ind_dir)
+                {
+                    if(!manager) return;
+                    var level = document.getElementById("level");
+                    var index = document.getElementById("index");
+                    manager.movePos(ind_dir);
+
+                };
+
+
 
                 this.stepLvl = function(dir)
                 {
@@ -263,7 +300,7 @@
                         index.value = window.icfg.current.index;
                     }else
                     {
-                        _this.move(dir, 0);
+                        _this.moveByTile(dir, 0);
                     }
                 };
 
@@ -305,8 +342,6 @@
                     }
 
                 }
-
-
 
             };
 

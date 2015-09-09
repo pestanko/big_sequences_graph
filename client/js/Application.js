@@ -28,14 +28,37 @@ function ApplicationManager(host, drawer)
     this.host = host || "ws://locahost:10888";
     this.levels = null;
 
+    this.currLvl = function()
+    {
+        return this.levels[this.current.level];
+    };
+
+    this.currIndex = function()
+    {
+        return this.currLvl().lowIndex();
+    }
+
+    this.internal_load = function()
+    {
+        if(!this.levels)
+        {
+            return;
+        }
+        _this.levels[_this.current.level].loadBuffer();
+        _this.draw();
+    };
+
     var interval = setInterval(function() {
         if (window.config) {
             clearInterval(interval);
-            _this.initLevels();
             _this.drawer.requestWindowSize();
             _this.calculateWindowSize();
+            _this.initLevels();
+            _this.internal_load();
         }
     }, 100);
+
+
 
 
     this.calculateWindowSize = function(width)
@@ -46,8 +69,6 @@ function ApplicationManager(host, drawer)
         var tiles = Math.floor( width / (window.icfg.factor * t_size) );
         _this.log.debug("[DEBUG] Tiles in window: ", tiles);
         wc.active_window_size = tiles;
-        _this.levels[_this.current.level].loadBuffer();
-        _this.draw();
     };
 
 
@@ -58,6 +79,8 @@ function ApplicationManager(host, drawer)
         {
             this.levels[i] = new WindowLevel(i, this.connection);
         }
+
+        _this.levels[_this.levels.length - 1].raw = true;
     };
 
     this.countLevelSize = window.stat.levelTiles;
@@ -66,7 +89,6 @@ function ApplicationManager(host, drawer)
 
     this.contains = function(level, index)
     {
-
         if(!_this.levels)
         {
             this.log.warning("[WARNING] Levels are not init.");
@@ -100,14 +122,14 @@ function ApplicationManager(host, drawer)
 
     this.moveTile = function(dir_num)
     {
-        this.levels[this.current.level].moveTile(dir_num);
+        this.currLvl().moveTile(dir_num);
         this.draw();
     };
 
     this.moveTo = function(level, index)
     {
         level = level | this.current.level;
-        index = index | this.current.index;
+        index = index | this.currIndex();
 
         if(level < 0) this.current.level = 0;
         if(level >= this.levels.length) level = this.levels.length - 1;
@@ -174,23 +196,29 @@ function ApplicationManager(host, drawer)
     {
         var prev = this.current.level;
 
-        tile_no = tile_no | this.current.index;
+
+        tile_no = tile_no | this.currIndex();
 
         var lvl_size = window.stat.levelTiles(prev);
 
         var oneTile = Math.floor(window.config.size / lvl_size);
         var n_pos = oneTile * tile_no;
-        this.log.debug("[DEBUG] New Tile pos: [%d, %d] ", this.current.level, n_pos);
+        this.log.debug("[DEBUG] New Tile pos: [%d, %d] ", this.currLvl(), n_pos);
         this.moveToPosition(dir_lvl, n_pos);
     };
 
     this.move = function(dir_lvl, dir_tile)
     {
-        var d_lvl = this.current.level + dir_lvl;
-        var d_tl = this.current.index + dir_tile;
+        var d_lvl = this.currIndex() + dir_lvl;
+        var d_tl = this.currIndex() + dir_tile;
         if(dir_lvl == 0) this.moveTile(dir_tile);
         else if(dir_tile == 0) this.moveLevel(dir_lvl);
         else this.moveTo(d_lvl, d_tl);
+    };
+
+    this.movePos = function(dir)
+    {
+
     };
 
     this.moveToPosition = function(dir, pos)
@@ -202,8 +230,8 @@ function ApplicationManager(host, drawer)
             new_level = this.levels.length - 1;
 
         this.current.level = new_level;
-        this.current.index = window.stat.convertToTile(pos);
-        this.log.warning("[INFO] moveToPosition - New position [%d, %d].", this.current.level, this.current.index);
+        this.currLvl().moveTo(window.stat.convertToTile(pos));
+        this.log.warning("[INFO] moveToPosition - New position [%d, %d].", this.current.level, this.currIndex());
         this.moveTile(0);
     };
 };
