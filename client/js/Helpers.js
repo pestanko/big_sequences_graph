@@ -10,10 +10,10 @@
 window.icfg =
 {
     current: {level: 0},
-    factor: 3,
+    factor: 10,
     domain: {x : [0,1000], y: [0,2000]},
     threshold: 20,
-    position: {beg: 0, end: 0}
+    position: {beg: 0, end: 1000000}
 };
 
 
@@ -30,14 +30,25 @@ window.stat =
         {
             return 0;
         }
-        var lvl_size = this.levelTiles();
+
+        var lvl = window.icfg.current.level;
+        var max = window.config.levels - 1;
+        var diff = max - lvl;
+
+        var num = window.config.size/window.config.tile_size;
+        for(var i = 0; i < diff; i++)
+        {
+            num = Math.ceil(num/window.config.tile_size);
+        }
+
+        var lvl_size = num;
         var avs = window.config.active_window_size;
         if(avs < lvl_size)
             return avs;
         return lvl_size;
     },
 
-    levelTiles:function(lvl)
+    levelTiles: function(lvl)
     {
         if(!window.config) return 0;
         lvl = lvl || window.icfg.current.level;
@@ -55,17 +66,24 @@ window.stat =
 
     logging: function() {
         console.log.apply(console, arguments);
-    },
+
+           },
 
     convertToTile: function(position, curr_lvl)
     {
         if(!window.config) return 0;
         curr_lvl = curr_lvl || window.icfg.current.level;
         var size = window.config.size;
-        var lvl_tiles = this.levelTiles(curr_lvl);
-        console.log("TILES: %d, diff: %d", lvl_tiles, size/lvl_tiles);
+        var max = window.config.levels - 1;
+        var diff = max - curr_lvl;
 
-        var tile_pos = position / (size / lvl_tiles);
+        var num = window.config.size/window.config.tile_size;
+        for(var i = 0; i < diff; i++)
+        {
+            num = Math.ceil(num/window.config.tile_size);
+        }
+
+        var tile_pos = position / (size / num);
         return Math.floor(tile_pos);
     },
 
@@ -110,9 +128,9 @@ function SimpleLogger()
         if(this.disabled.error) return;
         this.log.apply(null, arguments);
     };
-    this.warning = function()
+    this.warn = function()
     {
-        if(this.disabled.warning) return;
+        if(this.disabled.warn) return;
         this.log.apply(null,arguments);
     };
     this.debug = function()

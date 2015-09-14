@@ -6,14 +6,16 @@
  */
 
 
-function WindowLevel(level, connection)
+function WindowLevel(level, connection, raw)
 {
+
     // Size of level - Number of tiles
     var lvl_size = window.stat.levelTiles(level);
 
+    var requested_tiles = {};
+
     // Array of Tiles
     this.tiles = new Array(lvl_size);
-    //Pointer to current position {level, index}
     //Level id
     this.level = level;
     //Connection manager
@@ -21,25 +23,41 @@ function WindowLevel(level, connection)
     // Self pointer
     var _this = this;
     // Logging tool
-    this.log = new SimpleLogger();
+    this.log = Logger;
     // function to calculate window size
-    this.window_size = function() { return this.interval.end - this.interval.beg; };
+    this.window_size = function() { //TODO
+        var int = pos_int();
+        var diff = (int.end - int.beg);
+        if(diff < 0) return window.stat.windowSize();
+        if(diff > 2*window.stat.windowSize())
+        {
+            return window.stat.windowSize() * 2;
+        }
+        return diff;
+    };
     // Current interval in tile indexes
-    this.interval = {beg: 0, end: window.stat.windowSize()};
     // previous interval in coordinates
-    this.prev_interval = {beg: 0, end: 0};
+    this.prev_pos = {beg: 0, end: 0};
+    this.pos = window.icfg.position;
 
-    this.raw = false;
+    this.raw = raw || false;
 
+    var pos_tile = window.stat.convertToTile;
+
+
+    var pos_int = function(pos)
+    {
+        pos = pos || _this.pos;
+        return {beg:  pos_tile(pos.beg), end: pos_tile(pos.end) };
+    };
     var max = window.config.levels - 1;
     var diff = max - level;
-
     this.tileSize = Math.pow(window.config.tile_size, diff + 1);
 
 
     this.saveInterval = function()
     {
-        this.prev_interval = this.interval;
+        this.prev_pos = this.pos;
     };
 
     this.updateInterval = function(interval)
@@ -63,7 +81,7 @@ function WindowLevel(level, connection)
      * @constructor
      */
     this.UpDownDiff = function (inter, prev) {
-        var pb = this.prev_interval.beg;
+        var pb = pos_tile(this.prev_pos.beg);
         inter = inter  ||  {beg:this.lowBuffIndex(), end:this.upBuffIndex()};
         prev = prev ||  {beg:this.lowBuffIndex(pb), end:this.upBuffIndex(pb)};
 
@@ -103,13 +121,9 @@ function WindowLevel(level, connection)
 
     this.activeClean = function(inter, prev)
     {
-        inter = inter || this.interval;
-        prev = inter || this.prev_interval;
+        inter = inter || pos_int() ;
+        prev = inter ||  pos_int(this.prev_pos) ;
 
-        var w_size = prev.end - prev.beg;
-
-        var i_b = this.lowBuffIndex(inter.beg);
-        var i_e = this.upBuffIndex(inter.end);
         var p_b = this.lowBuffIndex(prev.beg);
         var p_e = this.upBuffIndex(prev.end);
 
@@ -119,15 +133,16 @@ function WindowLevel(level, connection)
 
         for(var i = bounds.d_beg[0], j = 0; i < bounds.d_beg[1], j < pws; i++, j++)
         {
-
             this.deleteTile(i);
-
         }
+        this.log.info("[CLEAN]: Begin Interval [%d, %d].", bounds.d_beg[0], bounds.d_beg[1]);
 
         for(var i = bounds.d_end[0], j = 0; i < bounds.d_end[1], j < pws; i++, j++)
         {
             this.deleteTile(i);
         }
+        this.log.info("[CLEAN]: End Interval [%d, %d].", bounds.d_end[0], bounds.d_end[1]);
+
     };
 
     this.deleteTile = function(index)
@@ -147,28 +162,27 @@ function WindowLevel(level, connection)
 
     this.upIndex = function(index)
     {
-        index = index || this.interval.end;
+        index = index || pos_tile(this.pos.end);
         var up = index;
         if(up >= lvl_size)
         {
-            this.interval.end = lvl_size;
             return lvl_size
         }
         else
         {
-            return up;
+            return up + 1;
         }
     };
 
     this.lowIndex = function (index) {
-        if(!index) { index = this.interval.beg ;}
+        if(!index) { index = pos_tile(this.pos.beg) ;}
         var min = lvl_size - _this.window_size();
         return (index > min) ? min : index;
     };
 
     this.lowBuffIndex = function(index)
     {
-        index = index || this.interval.beg;
+        index = this.lowIndex(index);
         var low_size = Math.floor(this.window_size() * 1);
         var low = index - low_size;
         return low;
@@ -176,28 +190,26 @@ function WindowLevel(level, connection)
 
     this.upBuffIndex = function(index)
     {
-        index = index || this.interval.end;
-        var low_size = Math.floor(this.window_size() * 1);
-        var low = index + low_size;
-        return low;
+        index = this.upIndex(index);
+        var up_size = Math.ceil(this.window_size() * 1);
+        var up = index + up_size;
+        return up;
     };
 
-    this.moveTo = function(index)
+    this.moveTo = function()
     {
         var oldWinSize = this.window_size();
-        this.interval.beg = index;
-        this.interval.end = index + oldWinSize;
+        this.movePos(0, oldWinSize * this.tileSize);
     };
 
-    this.addTile = function(index, data)
-    {
-        _this.log.debug("[ADD] Tile @ [%d, %d].", level, index);
+    this.addTile = function(index, data){
         var tile_size = window.config.tile_size;
-
         var init_pos = window.stat.tileToPosition(level, index);
         var one_step = this.tileSize / tile_size;
         var number_of_channels = data.length;
         var tile = new Array(number_of_channels);
+
+        delete requested_tiles[index];
 
 
         for (var i = 0; i < number_of_channels; i++) // Each channels
@@ -230,29 +242,32 @@ function WindowLevel(level, connection)
 
     this.requestTile = function(index)
     {
-        if(!this.getTile(index))
+        if(!this.getTile(index) && !requested_tiles[index])
         {
-            if(index < lvl_size && index >= 0)
+            if(index < lvl_size && index >= 0) {
                 this.connection.getTile(this.level, index);
+                requested_tiles[index] = true;
+            }
         }
     };
 
     this.loadBuffer = function()
     {
-        //noinspection JSUnusedAssignment
-        var i = 0;
-        for(i = this.lowIndex(); i < this.upIndex(); i++)
+        var low = this.lowIndex();
+        var up = this.upIndex();
+        var upB = this.upBuffIndex();
+        var lowB=this.lowBuffIndex();
+        for(var i = low; i < up + 1; i++) // Window interval
         {
             this.requestTile(i)
         }
 
-        for(i = this.lowBuffIndex(); i < this.lowIndex(); i++)
+        for(var i =  up; i < upB; i++)
         {
             this.requestTile(i)
-
         }
 
-        for(i = this.upIndex(); i < this.upBuffIndex(); i++)
+        for(var i = lowB; i < low; i++)
         {
             this.requestTile(i)
         }
@@ -260,6 +275,9 @@ function WindowLevel(level, connection)
 
     this.getInterval = function (beg, end) {
         this.updateInterval({beg, end});
+
+        this.loadBuffer();
+
     };
 
 
@@ -276,103 +294,100 @@ function WindowLevel(level, connection)
         this.moveTile(direction);
     };
 
-    this.toDomainX = function()
+    this.scale = function (dir)
     {
-        var beg = this.tileSize * this.interval.beg;
-        var end = this.tileSize * this.interval.end;
-        return [beg, end];
-    };
-
-    this.scale = function (dir) {
-        dir /= 10;
-        var new_beg = this.interval.beg + dir;
-        var new_end = this.interval.end - dir;
-        var w_size = this.window_size();
-
-        /*if(new_beg >= new_end)
-        {
-            new_beg -= w_size;
-        }
-        if(new_end <= new_beg)
-        {
-            new_end += w_size;
-        }*/
-
-        if(new_end >= this.tiles.length)
-        {
-            new_end = this.tiles.length;
-        }
-        if(new_beg <= 0)
-        {
-            new_beg = 0;
-        }
-
-
-
-        this.interval.beg = new_beg;
-        this.interval.end = new_end;
-
-        this.log.info("[INFO]: New Interval [%d, %d] .", this.interval.beg, this.interval.end);
-
-
+        this.movePos(-dir, dir);
     };
 
 
-
-    this.moveTile = function(direction)
+    this.movePos = function(dir_beg, dir_end)
     {
-        var sum = this.interval.beg + direction;
-        var oldIndex = this.interval.beg;
-        var n_index = 0;
-        var w_size = this.window_size();
+        var max_size = window.config.size;
+
+        var oneStep = this.tileSize / window.config.tile_size;
+
+        dir_beg *= (oneStep/2);
+        dir_end *= (oneStep/2);
+
+        var p_beg = this.pos.beg;
+        var p_end = this.pos.end;
+
+        var beg = p_beg + dir_beg,
+            end = p_end + dir_end;
 
 
-        if(sum < 0)
+
+        var std_w_size = window.stat.windowSize();
+        var w_size_limit = std_w_size * 1.5;
+        var w_size_pos =  w_size_limit * this.tileSize;
+
+
+        var diff = end - beg;
+
+        if(diff >= w_size_pos)
         {
-            n_index = 0;
-        }
-        else if(sum >= (lvl_size - w_size))
-        {
-            n_index = lvl_size - w_size;
-        }
-        else
-        {
-            n_index = sum;
-        }
-
-        this.interval.beg = n_index;
-        this.interval.end = n_index + w_size;
-        var del =  { min: 0, max: 0};
-        var bf_size = this.upBuffIndex() - this.lowBuffIndex();
-
-
-        if(direction > 0)
-        {
-            del.min = this.lowBuffIndex(oldIndex);
-            del.max = this.lowBuffIndex(n_index);
-
-
-            for(var i = del.min; i < del.max && i <= del.min + bf_size; i++)
-            {
-                _this.log.info("[DELETE] Tile @ [%d, %d]. ", level, this.interval.beg);
-                this.tiles[i] = null;
-            }
-        }
-        else
-        {
-            del.min = this.upBuffIndex(n_index);
-            del.max = this.upBuffIndex(oldIndex);
-            for(var i = del.max - 1; i >= del.min && i >= (del.max - bf_size); i--)
-            {
-                _this.log.info("[DELETE] Tile @ [%d, %d]. ", level, this.interval.beg);
-                this.tiles[i] = null;
-            }
+            end = beg + w_size_pos;
         }
 
-        _this.log.debug("~~~~~~~~ [DEBUG] Min vs Max: [%d, %d]", del.min, del.max);
+        if(beg >= end)
+        {
+            end = beg + this.tileSize;
+            return;
+        }
+
+        if(beg < 0){
+            beg = 0;
+            return;
+        }
+        if(end > max_size)
+        {
+            end = max_size;
+            return;
+        }
+
+        this.pos.beg = beg;
+        this.pos.end = end;
+
+        var gp = window.stat.convertToTile;
 
 
-        this.loadBuffer();
+        var nbt = gp(beg);
+        var net = gp(end);
+
+        this.getInterval(nbt,net + 1);
+
+    };
+
+    this.move = function(dir)
+    {
+        dir *= (this.tileSize);
+        this.movePos(dir, dir);
+    };
+
+    this.moveScaled = function()
+    {
+        var beg = this.pos.beg;
+        var end = this.pos.end;
+        var std_w_size = window.stat.windowSize();
+        var w_size_limit = std_w_size * 1.5;
+        var w_size_pos =  w_size_limit * this.tileSize;
+
+        if(beg + w_size_pos > end  )
+        {
+            end = beg + w_size_pos;
+        }
+
+        var diff = end - this.pos.end;
+
+
+        this.movePos(0, diff);
+    };
+
+
+
+    this.moveTile = function(dir)
+    {
+        this.movePos(dir * this.tileSize, dir * this.tileSize);
     };
 
 };

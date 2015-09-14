@@ -6,11 +6,11 @@ function ConnectionManager(host)
 {
     this.wsocket = new WebSocket(host);
     var _this = this;
-    this.log = new SimpleLogger();
+    this.log = Logger;
 
-    this.wsocket.onopen = function(event)
+    this.wsocket.onopen = function()
     {
-        _this.log.info("[INFO] WebSocket connected to " + host);
+        _this.log.info("[INFO] WebSocket connected to remote host [%s] ", host);
     };
 
     this.wsocket.onmessage = function(event)
@@ -23,25 +23,30 @@ function ConnectionManager(host)
                 _this.receivedTile(message);
                 break;
 
+            case "tiles":
+                _this.receivedTiles(message.data);
+                break;
+
             case "config":
                 _this.updateConfig(message);
-                _this.log.debug("[DEBUG] Received config message.", message);
+                _this.log.debug("[DEBUG] Received config message: ", message);
                 break;
         }
     };
 
     this.wsocket.onerror = function(event)
     {
-        var message = event.data
-        _this.log.error("[ERROR] -- WEBSOCKET:  " +  message)
+        var message = event.data;
+        _this.log.error("[ERROR] -- WebSocket fatal error:  ", message)
     };
 
-    this.wsocket.onclose = function(event)
+    this.wsocket.onclose = function()
     {
-        _this.log.info("[INFO] Websocket closed connection.")
+        _this.log.info("[INFO] WebSocket closed connection.")
     };
 
     this.receivedTile = null;
+    this.receivedTiles = null;
 
     this.updateConfig = function(message)
     {
@@ -64,6 +69,19 @@ function ConnectionManager(host)
         var message =
         {
             type: "get",
+            level: level,
+            index: index
+        };
+
+        this.wsocket.send(JSON.stringify(message));
+    };
+
+    this.getTiles = function(level,index)
+    {
+        _this.log.info("[INFO] Calling get tiles @ level [%d] and interval [%d, %d]", level ,index.beg, index.end);
+        var message =
+        {
+            type: "get_tiles",
             level: level,
             index: index
         };

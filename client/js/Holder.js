@@ -14,7 +14,7 @@ function WindowDataHolder(level)
     var maxTile = 0;
     this.level = level;
     this.data = [];
-    this.log = window.stat.logging();
+    this.log = Logger;
 
     this.addTilesBuff = function(beg_index, end_index)
     {

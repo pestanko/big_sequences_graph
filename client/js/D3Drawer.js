@@ -8,7 +8,7 @@
 function D3Drawer(main_container_name) {
     var main_container = d3.select(main_container_name);
     var main_node = main_container.node();
-    this.log = new SimpleLogger();
+    this.log = Logger;
     this.currentLevel = null;
 
     var margin = {top: 20, right: 20, bottom: 50, left: 50},
@@ -137,13 +137,11 @@ function D3Drawer(main_container_name) {
 
         if(!level) return;
 
-        this.domain.x = level.toDomainX();
+        this.domain.x = [this.pos.beg, this.pos.end ];
 
         _this.x.domain(this.domain.x);
         _this.y.domain(this.domain.y);
 
-        window.icfg.position.beg = this.domain.x[0];
-        window.icfg.position.end = this.domain.y[1];
 
 
         this.currentLevel = level;
@@ -216,13 +214,14 @@ function D3Drawer(main_container_name) {
         path_container = container.append("g").attr("class", "path_container");
 
 
-        for (var i = level.lowIndex(); i < level.upIndex(); i++) {
+        for (var i = level.lowIndex() - 5; i < level.upIndex() + 5; i++) {
+
             var tile = level.tiles[i];
+            if(!tile) continue;
             _this.drawTile(tile);
             var taker = this.taker(level.tiles[i], level.tiles[i+1]);
             if(taker)
             {
-                //console.log(" [REMOVE] TAKER: ", taker);
                 _this.drawTile(taker);
             }
         }
@@ -357,7 +356,7 @@ function D3Drawer(main_container_name) {
 
     this.scaleX = function(dir)
     {
-        this.currentLevel.scale(dir/100);
+        this.currentLevel.scale(dir/50);
         this.drawLevel();
     };
 
