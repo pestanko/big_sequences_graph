@@ -55,95 +55,6 @@ function WindowLevel(level, connection, raw)
     this.tileSize = Math.pow(window.config.tile_size, diff + 1);
 
 
-    this.saveInterval = function()
-    {
-        this.prev_pos = this.pos;
-    };
-
-    this.updateInterval = function(interval)
-    {
-        this.saveInterval();
-        this.interval = interval;
-    };
-
-    this.dataSize = function()
-    {
-        return this.window_size() * this.tileSize;
-    };
-
-
-
-    /**
-     * Function calculate which tiles should be allocated
-     * @param inter - current interval
-     * @param prev - previous interval
-     * @returns {{a_beg: number[], a_end: number[], d_end: number[], d_beg: number[]}}
-     * @constructor
-     */
-    this.UpDownDiff = function (inter, prev) {
-        var pb = pos_tile(this.prev_pos.beg);
-        inter = inter  ||  {beg:this.lowBuffIndex(), end:this.upBuffIndex()};
-        prev = prev ||  {beg:this.lowBuffIndex(pb), end:this.upBuffIndex(pb)};
-
-        var diff_beg = inter.beg - prev.beg;
-        var diff_end = inter.end - prev.end;
-
-        var d_beg = [0,0];
-        var d_end = [0,0];
-        var a_beg = [0,0];
-        var a_end = [0,0];
-
-        if(diff_beg < 0)
-        {
-            // Ib < Pb -- shift left
-            a_beg = [inter.beg , prev.beg];
-        }else
-        {
-            d_beg = [prev.beg, inter.beg];
-        }
-
-        if(diff_end < 0)
-        {
-            a_end = [inter.beg, prev.end];
-        }else
-        {
-            d_end = [prev.end, inter.end];
-        }
-
-        return {a_beg : a_beg, a_end: a_end, d_end: d_end, d_beg: d_beg};
-    };
-
-    /**
-     * Function deletes tiles
-     * @param inter - current interval
-     * @param prev - previous interval
-     */
-
-    this.activeClean = function(inter, prev)
-    {
-        inter = inter || pos_int() ;
-        prev = inter ||  pos_int(this.prev_pos) ;
-
-        var p_b = this.lowBuffIndex(prev.beg);
-        var p_e = this.upBuffIndex(prev.end);
-
-        var bounds = this.UpDownDiff();
-
-        var pws = p_b - p_e;
-
-        for(var i = bounds.d_beg[0], j = 0; i < bounds.d_beg[1], j < pws; i++, j++)
-        {
-            this.deleteTile(i);
-        }
-        this.log.info("[CLEAN]: Begin Interval [%d, %d].", bounds.d_beg[0], bounds.d_beg[1]);
-
-        for(var i = bounds.d_end[0], j = 0; i < bounds.d_end[1], j < pws; i++, j++)
-        {
-            this.deleteTile(i);
-        }
-        this.log.info("[CLEAN]: End Interval [%d, %d].", bounds.d_end[0], bounds.d_end[1]);
-
-    };
 
     this.deleteTile = function(index)
     {
@@ -262,7 +173,7 @@ function WindowLevel(level, connection, raw)
             this.requestTile(i)
         }
 
-        for(var i =  up; i < upB; i++)
+        for(var i =  up; i < upB + 1; i++)
         {
             this.requestTile(i)
         }
@@ -272,14 +183,6 @@ function WindowLevel(level, connection, raw)
             this.requestTile(i)
         }
     };
-
-    this.getInterval = function (beg, end) {
-        this.updateInterval({beg, end});
-
-        this.loadBuffer();
-
-    };
-
 
 
     this.getTile = function(index)
@@ -354,8 +257,16 @@ function WindowLevel(level, connection, raw)
         var nbt = gp(beg);
         var net = gp(end);
 
-        this.getInterval(nbt,net + 1);
+        this.loadBuffer();
+        this.prev_pos = this.pos;
 
+    };
+
+    this.update = function()
+    {
+        var move_beg = this.pos.beg - this.prev_pos.beg;
+        var move_end = this.pos.end - this.prev_pos.end;
+        this.movePos(move_beg, move_end);
     };
 
     this.move = function(dir)

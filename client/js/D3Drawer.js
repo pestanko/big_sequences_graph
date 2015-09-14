@@ -32,6 +32,8 @@ function D3Drawer(main_container_name) {
     this.domain.x = [0, 900];
     this.domain.y = [0, 2000];
 
+    this.drawTiles = true;
+
     this.pos = window.icfg.position;
 
 
@@ -76,12 +78,25 @@ function D3Drawer(main_container_name) {
         window.config.client_width = getWidth;
     };
 
+    this.updateAxes = function()
+    {
 
+
+
+        _this.x.domain(this.domain.x);
+        _this.y.domain(this.domain.y);
+
+
+        container.select(".x").call(xAxis);
+        container.select(".y").call(yAxis);
+
+    };
 
 
     this.reload = function () {
 
         var cont = d3.select(main_container_name);
+        this.setAxisX();
 
         if (cont)
         {
@@ -136,20 +151,11 @@ function D3Drawer(main_container_name) {
         level = level || this.currentLevel;
 
         if(!level) return;
-
-        this.domain.x = [this.pos.beg, this.pos.end ];
-
-        _this.x.domain(this.domain.x);
-        _this.y.domain(this.domain.y);
-
-
-
         this.currentLevel = level;
+        this.updateAxes();
 
-        container.select(".x").call(xAxis);
-        container.select(".y").call(yAxis);
-
-        this.refreshLevel(level);
+        if(this.drawTiles)
+            this.refreshLevel(level);
 
     };
 
@@ -160,6 +166,7 @@ function D3Drawer(main_container_name) {
 
         if(!level) return;
 
+        this.setAxisX();
 
         var interval = setInterval(function(){
 
@@ -176,7 +183,8 @@ function D3Drawer(main_container_name) {
             if(ready)
             {
                 clearInterval(interval);
-               _this.redrawLevel(level);
+                if(_this.drawTiles)
+                    _this.redrawLevel(level);
             }
 
         }, 100);
@@ -194,7 +202,6 @@ function D3Drawer(main_container_name) {
             last_elem[i] = new Array(2);
             last_elem[i][0] = first[i][size - 1];
             last_elem[i][1] = last[i][0];
-
         }
 
 
@@ -252,53 +259,8 @@ function D3Drawer(main_container_name) {
     };
 
 
-    this.drawGridVertical = function (cont) {
-
-        var level = this.currentLevel;
-        if(!level) return;
-        var start = window.stat.tileToPosition(level, index);
-        var stop = start + (level.window_size() * level.tileSize);
-        var step = this.tileSize / window.config.tile_size;
-
-        for (var i = start; i <= stop; i+= step) {
-            var x_coor = _this.x(i);
-            cont.append("line")
-                .attr("x1", x_coor)  //<<== change your code here
-                .attr("y1", 0)
-                .attr("x2", (x_coor))  //<<== and here
-                .attr("y2", height)
-                .style("stroke-width", 1)
-                .style("stroke", "#999")
-                .style("fill", "none");
-        }
-    };
-
-    this.updateSelectLine = function(ix)
-    {
-        this.drawSelectLine(path_container, curr_shift, ix);
-    };
 
 
-    this.drawSelectLine = function(cont, shift ,x_pos)
-    {
-        var sel_line = d3.select("#selectLine");
-        if(sel_line)
-            sel_line.remove();
-        x_pos = x_pos || 0;
-        shift = shift || curr_shift;
-        curr_shift = shift;
-        var x_coor = (x_pos);
-        var line = cont.append("line")
-            .attr("id", "selectLine")
-            .attr("x1", x_coor)  //<<== change your code here
-            .attr("y1", 0)
-            .attr("x2", (x_coor))  //<<== and here
-            .attr("y2", height)
-            .style("stroke-width", 1)
-            .style("stroke", "#F00")
-            .style("fill", "none");
-        return line;
-    };
 
     this.getSelectX = function(ix)
     {
@@ -351,13 +313,28 @@ function D3Drawer(main_container_name) {
         var min = this.domain.y[0];
         var max = this.domain.y[1];
         this.domain.y = [ min + dir, max - dir ];
-        this.drawLevel();
+        this.updateAxes();
     };
 
     this.scaleX = function(dir)
     {
-        this.currentLevel.scale(dir/50);
-        this.drawLevel();
+
+        //this.currentLevel.scale(dir/50);
+        var min = this.domain.x[0];
+        var max = this.domain.x[1];
+        this.domain.x = [ min + dir, max - dir ];
+        this.updateAxes();
+    };
+
+    this.setAxisX = function()
+    {
+        if(!this.currentLevel)
+            this.domain.x = [this.pos.beg, this.pos.end ];
+
+        this.pos.beg = this.domain.x[0];
+        this.pos.end = this.domain.x[1];
+        if(this.currentLevel)
+            this.currentLevel.update();
     };
 
 

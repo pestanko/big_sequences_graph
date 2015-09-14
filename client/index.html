@@ -8,6 +8,8 @@
         <link ref="stylesheet" href="css/layout.css"/>
         <script type="text/javascript" src="js/bower_components/js-logger/src/logger.min.js">
         </script>
+        <script type="text/javascript" src="js/bower_components/jquery/dist/jquery.min.js">
+        </script>
         <script src="js/d3.min.js"></script>
         <script src="js/Helpers.js"></script>
         <script src="js/ConnectionManager.js"></script>
@@ -257,18 +259,20 @@
                 main_graph.onmousedown = function(e)
                 {
                     if(!window.config) return;
-                        clicked = true;
-                        prev_mouseX = e.clientX;
-                        prev_mouseY = e.clientY;
+                    drawer.drawTiles = false;
+                    clicked = true;
+                    prev_mouseX = e.clientX;
+                    prev_mouseY = e.clientY;
 
                 };
 
                 main_graph.onmouseup = function (e) {
                     if(!window.config) return;
+                    drawer.drawTiles = true;
                     clicked = false;
                     prev_mouseX = null;
                     prev_mouseY = null;
-
+                    drawer.drawLevel();
                 };
 
 
@@ -285,6 +289,8 @@
                     //drawer.updateSelectLine(x - w_pos.left);
 
                     _this.selected = ix;
+                    drawer.drawLevel();
+
                 };
 
                 this.moveByTile = function(lvl_dir, ind_dir)
