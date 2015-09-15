@@ -5,9 +5,16 @@
     "height": 800,
     "resize": "free",
     "dependencies": [
-        "js/d3.min.js",
-        "js/d3_handle.js",
-        "js/Application.js"
+      "js/bower_components/js-logger/src/logger.min.js",
+      "js/bower_components/jquery/dist/jquery.min.js",
+      "js/jquery.mousewheel.min.js",
+      "js/Helpers.js",
+      "js/d3.min.js",
+      "js/D3Drawer.js",
+      "js/Application.js",
+      "js/ConnectionManager.js",
+      "js/Level.js",
+      "js/Holder.js"
     ],
 
     "title": "HDR5 - Graphs",

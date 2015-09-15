@@ -17,7 +17,6 @@
         <script src="js/Level.js"></script>
         <script src="js/D3Drawer.js"></script>
         <script src="js/Holder.js"></script>
-        <script src="js/ConnectionManager.js"></script>
         <script src="js/Application.js"></script>
 
 
@@ -32,7 +31,7 @@
             .axis line {
                 fill: none;
                 stroke: #000;
-                shape-rendering: crispEdges;
+                /*shape-rendering: crispEdges;*/
             }
 
             .x.axis path {
@@ -97,7 +96,7 @@
             </div>
 
             <div id="grabber" style="width: 99%;height: 650px; border: 1px solid black">
-                <div id="graph_container" style="width: 80%; height: 600px;">
+                <div id="graph_container" style="width: 95%; height: 600px;">
 
                 </div>
             </div>
@@ -207,6 +206,7 @@
                 };
 
                 function getCoords(elem) { // crossbrowser version
+                    if(!elem) return null;
                     var box = elem.getBoundingClientRect();
 
                     var body = document.body;
@@ -279,7 +279,7 @@
 
                 main_graph.onclick = function(e)
                 {
-
+                    if(!window.config) return;
                     var svg = d3.select(".path_container");
                     var w_pos = getCoords(svg.node());
                     var x = e.clientX;

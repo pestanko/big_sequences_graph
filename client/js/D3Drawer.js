@@ -37,6 +37,10 @@ function D3Drawer(main_container_name) {
     this.pos = window.icfg.position;
 
 
+    const STYLE_AXIS=" fill: none;stroke: #000";
+    const STYLE_LINE= STYLE_AXIS+"shape-rendering: crispEdges;stroke: steelblue;stroke-width: 1.5px;";
+
+
     // Init
     var min_line = d3.svg.line()
         .x(function (d) {
@@ -129,12 +133,14 @@ function D3Drawer(main_container_name) {
 
         container.append("g")
             .attr("class", "x axis")
+           // .attr("style", STYLE_AXIS)
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
 
         container.append("g")
             .attr("class", "y axis")
             .call(yAxis)
+           // .attr("style", STYLE_AXIS)
             .append("text")
             .attr("transform", "rotate(-90)")
             .attr("y", 6)
@@ -271,11 +277,12 @@ function D3Drawer(main_container_name) {
 
     this.drawMinMax = function (data, chan) {
 
-        var cls = "line";
+        const cls = "line";
 
         path_container.append("path")
             .datum(data)
             .attr("class", cls)
+            .attr("style", STYLE_LINE)
             .attr("id", "chan" + chan)
             .attr("d", min_line);
 
@@ -283,6 +290,7 @@ function D3Drawer(main_container_name) {
         path_container.append("path")
             .datum(data)
             .attr("class", cls)
+            .attr("style", STYLE_LINE)
             .attr("id", "chan" + chan)
             .attr("d", min_line);
 
@@ -290,6 +298,7 @@ function D3Drawer(main_container_name) {
         path_container.append("path")
             .datum(data)
             .attr("class", cls)
+            .attr("style", STYLE_LINE)
             .attr("id", "chan" + chan)
             .attr("d", max_line);
 
@@ -319,7 +328,7 @@ function D3Drawer(main_container_name) {
     this.scaleX = function(dir)
     {
 
-        this.currentLevel.scale(dir/50);
+        this.currentLevel.scale(dir/25);
         this.updateAxes();
     };
 

@@ -9,7 +9,7 @@ var big_graph = SAGE2_App.extend( {
         // initialize your variables
         this.container_name = "container";
         this.host = "ws://localhost:10888/";
-        this.drawer = new D3_handle( "#" + this.container_name);
+        this.drawer = new D3Drawer( "#" + this.container_name);
         this.manager = new ApplicationManager(this.host, this.drawer);
         this.element.style.backgroundColor= "#DDD";
 

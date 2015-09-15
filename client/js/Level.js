@@ -268,13 +268,22 @@ function WindowLevel(level, connection, raw)
         this.movePos(dir, dir);
     };
 
-    this.moveScaled = function()
+    this.moveScaled = function(up_down)
     {
+
         var beg = this.pos.beg;
         var end = this.pos.end;
         var std_w_size = window.stat.windowSize();
         var w_size_limit = std_w_size * 1.5;
         var w_size_pos =  w_size_limit * this.tileSize;
+        if(up_down)
+        {
+            if(up_down < 0)
+            {
+                (end = end + w_size_pos/2);
+            }
+        }
+
 
         var diff = end - beg;
 
@@ -284,7 +293,8 @@ function WindowLevel(level, connection, raw)
          }
 
         var diff_e =  end  - this.pos.end;
-        console.log(">>> DIFF-E: %d", diff_e );
+
+
 
 
         this.movePos(0, diff_e);
