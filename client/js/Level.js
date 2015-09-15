@@ -199,25 +199,31 @@ function WindowLevel(level, connection, raw)
 
     this.scale = function (dir)
     {
-        this.movePos(-dir, dir);
+        this.moveVariable(-dir, dir);
     };
+
+    this.moveVariable = function(dir_beg, dir_end)
+    {
+        var oneStep = this.tileSize / window.config.tile_size;
+
+        dir_beg *= (oneStep/2);
+        dir_end *= (oneStep/2);
+        this.movePos(dir_beg, dir_end);
+    };
+
 
 
     this.movePos = function(dir_beg, dir_end)
     {
         var max_size = window.config.size;
 
-        var oneStep = this.tileSize / window.config.tile_size;
-
-        dir_beg *= (oneStep/2);
-        dir_end *= (oneStep/2);
-
         var p_beg = this.pos.beg;
         var p_end = this.pos.end;
 
+
+
         var beg = p_beg + dir_beg,
             end = p_end + dir_end;
-
 
 
         var std_w_size = window.stat.windowSize();
@@ -225,37 +231,24 @@ function WindowLevel(level, connection, raw)
         var w_size_pos =  w_size_limit * this.tileSize;
 
 
-        var diff = end - beg;
-
-        if(diff >= w_size_pos)
-        {
-            end = beg + w_size_pos;
-        }
-
         if(beg >= end)
         {
+            this.log.debug("[DEBUG]{STOP} - Begin is greater than end.");
             end = beg + this.tileSize;
-            return;
         }
 
         if(beg < 0){
+            this.log.debug("[DEBUG]{STOP} - Begin is negative");
             beg = 0;
-            return;
         }
         if(end > max_size)
         {
+            this.log.debug("[DEBUG]{STOP} - End is greater than max_size.");
             end = max_size;
-            return;
         }
 
         this.pos.beg = beg;
         this.pos.end = end;
-
-        var gp = window.stat.convertToTile;
-
-
-        var nbt = gp(beg);
-        var net = gp(end);
 
         this.loadBuffer();
         this.prev_pos = this.pos;
@@ -283,15 +276,18 @@ function WindowLevel(level, connection, raw)
         var w_size_limit = std_w_size * 1.5;
         var w_size_pos =  w_size_limit * this.tileSize;
 
-        if(beg + w_size_pos > end  )
-        {
-            end = beg + w_size_pos;
-        }
+        var diff = end - beg;
 
-        var diff = end - this.pos.end;
+         if(diff >= w_size_pos)
+         {
+         end = beg + w_size_pos;
+         }
+
+        var diff_e =  end  - this.pos.end;
+        console.log(">>> DIFF-E: %d", diff_e );
 
 
-        this.movePos(0, diff);
+        this.movePos(0, diff_e);
     };
 
 

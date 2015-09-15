@@ -10,6 +10,7 @@
         </script>
         <script type="text/javascript" src="js/bower_components/jquery/dist/jquery.min.js">
         </script>
+        <script type="text/javascript" src="js/jquery.mousewheel.min.js"></script>
         <script src="js/d3.min.js"></script>
         <script src="js/Helpers.js"></script>
         <script src="js/ConnectionManager.js"></script>
@@ -45,11 +46,11 @@
             }
             #container
             {
-                width: 80%;
+                width: 100%;
                 margin: auto;
             }
 
-            ul li {list-style: none;}
+            ul li {list-style: none; display: inline-block;}
 
 
 
@@ -69,15 +70,7 @@
                         <button id="ws_connect">Connect!</button>
                     </li>
                 </ul>
-                <ul style="float: right">
-                    <li>
-                        Level: <input type="number" value="0" id="level"> Tile: <input type="number" value="0" id="index">
-                    </li>
-                    <li >
-                        <button id="gotopos"> <strong>GO!</strong> </button>
-                    </li>
-                </ul>
-                <ul style="float:left">
+                <ul>
                     <li>
                         <button id="moveLeft">&lt;&lt;</button>
                         <button id="moveRight">&gt;&gt;</button>
@@ -87,7 +80,8 @@
                         <button id="moveLeftPos">&lt;</button>
                         <button id="moveRightPos">&gt;</button>
                     </li>
-
+                </ul>
+                <ul>
                     <li>
                         Scale:
                         <button id="scaleUp">+</button>
@@ -102,8 +96,10 @@
 
             </div>
 
-            <div id="graph_container" style="width: 100%; height: 600px;">
+            <div id="grabber" style="width: 99%;height: 650px; border: 1px solid black">
+                <div id="graph_container" style="width: 80%; height: 600px;">
 
+                </div>
             </div>
 
         </div>
@@ -133,7 +129,7 @@
                     console.log("Resize event called!");
                     drawer.reload();
                     if(manager)
-                        manager.moveTile(0);
+                        manager.moveByPos(0);
                 }
 
                 d3.select("#sizeInc").on("click", function()
@@ -191,7 +187,6 @@
                 d3.select("#scaleDown").on("click", function()
                 {
                     if(!manager) return;
-                    _this.stepLvl(-1);
                     drawer.scaleX(-1000);
                 });
 
@@ -201,14 +196,6 @@
                     host = document.getElementById("ws_host").value;
                     window.icfg.current.level = 0;
                     manager = new ApplicationManager(host, drawer);
-
-                });
-                d3.select("#gotopos").on("click", function()
-                {
-                    var level = document.getElementById("level").value;
-                    var index = document.getElementById("index").value;
-                    if(manager == null) return;
-                    manager.moveTo(level, index);
                 });
 
                 var main_node = d3.select(graph_container).node();
@@ -253,10 +240,22 @@
                         drawer.scaleY(diff_y*3);
                         drawer.scaleX(diff_x*3);
                     }
-
                 };
 
-                main_graph.onmousedown = function(e)
+                $('#grabber').mousewheel(function(event) {
+                    if(!window.config) return;
+                    //console.log(event.deltaX, event.deltaY, event.deltaFactor);
+                    drawer.scaleX(event.deltaY * event.deltaFactor);
+                    if(drawer.deltaX)
+                    {
+                        drawer.scaleY(event.deltaX * event.deltaFactor);
+                    }
+                    drawer.drawLevel();
+                });
+
+                var grabber = d3.select("#grabber").node();
+
+                grabber.onmousedown = function(e)
                 {
                     if(!window.config) return;
                     drawer.drawTiles = false;
@@ -266,7 +265,7 @@
 
                 };
 
-                main_graph.onmouseup = function (e) {
+                grabber.onmouseup = function (e) {
                     if(!window.config) return;
                     drawer.drawTiles = true;
                     clicked = false;
@@ -285,8 +284,6 @@
                     var w_pos = getCoords(svg.node());
                     var x = e.clientX;
                     var ix = drawer.getSelectX(x - w_pos.left);
-                    console.log("ix - drawing: %d", ix );
-                    //drawer.updateSelectLine(x - w_pos.left);
 
                     _this.selected = ix;
                     drawer.drawLevel();
@@ -296,18 +293,15 @@
                 this.moveByTile = function(lvl_dir, ind_dir)
                 {
                     if(!manager) return;
-                    var level = document.getElementById("level");
-                    var index = document.getElementById("index");
+
                     manager.move(lvl_dir, ind_dir);
-                    level.value = window.icfg.current.level;
-                    index.value = window.icfg.current.index;
+
                 };
 
                 this.moveByPos = function(ind_dir)
                 {
                     if(!manager) return;
-                    var level = document.getElementById("level");
-                    var index = document.getElementById("index");
+
                     manager.movePos(ind_dir);
 
                 };
@@ -320,20 +314,17 @@
                     if(_this.selected)
                     {
                         manager.moveToPosition(dir, _this.selected);
-                        level.value = window.icfg.current.level;
-                        index.value = window.icfg.current.index;
+
                     }else
                     {
                         _this.moveByTile(dir, 0);
                     }
                 };
 
-                document.onkeydown =  function checkKey(e) {
+                window.onkeydown =  function checkKey(e) {
 
                     e = e || window.event;
 
-                    var level = document.getElementById("level");
-                    var index = document.getElementById("index");
 
                     if(e.altKey)
                     {
@@ -342,6 +333,7 @@
                             host = document.getElementById("ws_host").value;
                             manager = new ApplicationManager(host, drawer);
                         }
+
                     }
 
                     if (e.keyCode == '38') {
@@ -367,7 +359,8 @@
 
                     }
 
-                }
+                };
+
 
             };
 

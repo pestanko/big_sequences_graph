@@ -81,7 +81,8 @@ function D3Drawer(main_container_name) {
     this.updateAxes = function()
     {
 
-
+        this.domain.x = [ _this.pos.beg, _this.pos.end];
+        this.domain.x = [ _this.pos.beg, _this.pos.end];
 
         _this.x.domain(this.domain.x);
         _this.y.domain(this.domain.y);
@@ -89,7 +90,6 @@ function D3Drawer(main_container_name) {
 
         container.select(".x").call(xAxis);
         container.select(".y").call(yAxis);
-
     };
 
 
@@ -319,22 +319,16 @@ function D3Drawer(main_container_name) {
     this.scaleX = function(dir)
     {
 
-        //this.currentLevel.scale(dir/50);
-        var min = this.domain.x[0];
-        var max = this.domain.x[1];
-        this.domain.x = [ min + dir, max - dir ];
+        this.currentLevel.scale(dir/50);
         this.updateAxes();
     };
 
     this.setAxisX = function()
     {
-        if(!this.currentLevel)
-            this.domain.x = [this.pos.beg, this.pos.end ];
-
-        this.pos.beg = this.domain.x[0];
+      /*  this.pos.beg = this.domain.x[0];
         this.pos.end = this.domain.x[1];
         if(this.currentLevel)
-            this.currentLevel.update();
+            this.currentLevel.update();*/
     };
 
 

@@ -207,7 +207,7 @@ function ApplicationManager(host, drawer)
 
     this.movePos = function(dir)
     {
-        this.currLvl().movePos(dir, dir);
+        this.currLvl().moveVariable(dir, dir);
         this.draw();
     };
 
