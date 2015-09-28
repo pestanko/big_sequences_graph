@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WS Client test</title>
+    <script src="js/Application.js"></script>
+</head>
+<body>
+    <div id="container">
+        <ul>
+            <li>
+                <input type="text" value="ws://localhost:10888" id="ws_host"/>
+            </li>
+            <li>
+                <input type="button" value="Connect!" id="ws_connect" />
+            </li>
+        </ul>
+    </div>
+
+
+
+
+
+
+    <script>
+
+        var main = function()
+        {
+            var ws_connect = null;
+            var host = "ws://locahost:10888";
+
+
+            d3.select("ws_connect").on("click", function()
+            {
+                host = d3.select("ws_host").node().value;
+                console.log("Conneting to: " + host);
+                ws_connect = new ApplicationManager(host);
+            });
+        }
+
+
+
+    </script>
+
+
+</body>
+</html>

@@ -1,1 +1,1 @@
-THIS IS A PYTHON SERVER FOR MY BACHELOR THESIS
+### This is a python server for my BC Thesis
