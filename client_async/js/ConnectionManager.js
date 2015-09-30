@@ -23,8 +23,8 @@ function ConnectionManager(host)
                 _this.receivedTile(message);
                 break;
 
-            case "tiles":
-                _this.receivedTiles(message.data);
+            case "tile-int":
+                _this.receivedTiles(message);
                 break;
 
             case "config":
@@ -81,9 +81,10 @@ function ConnectionManager(host)
         _this.log.info("[INFO] Calling get tiles @ level [%d] and interval [%d, %d]", level ,index.beg, index.end);
         var message =
         {
-            type: "get_tiles",
+            type: "get-tiles",
             level: level,
-            index: index
+            beg: index.geg,
+            end: index.end
         };
 
         this.wsocket.send(JSON.stringify(message));

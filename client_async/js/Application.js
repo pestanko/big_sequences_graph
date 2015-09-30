@@ -60,6 +60,22 @@ function ApplicationManager(host, drawer)
     }, 100);
 
 
+    this.getLevel = function(index)
+    {
+
+        var levels = this.levels;
+        if(index < 0)
+        {
+            return levels[0];
+        }
+        if(index >= levels.length)
+        {
+            return levels[levels.length - 1];
+        }
+        return levels[index];
+
+    };
+
 
 
     this.calculateWindowSize = function(width)
@@ -78,7 +94,7 @@ function ApplicationManager(host, drawer)
         _this.levels = new Array(window.config.levels);
         for(var i = 0 ; i < _this.levels.length; i++)
         {
-            var windowLevel = new WindowLevel(i, this.connection);
+            var windowLevel = new WindowLevel(i, this);
             this.levels[i] = windowLevel;
             windowLevel.moveLevel = this.moveLevel;
 
@@ -123,9 +139,17 @@ function ApplicationManager(host, drawer)
 
     this.connection.receivedTiles = function(message)
     {
-        message.forEach(function(msg){
-            add_tile_intern(msg);
-        });
+        var level = message.level;
+        var beg = message.beg;
+        var end = message.end;
+        var data = message.data;
+        var raw = message.raw;
+        var j = 0;
+        for(var i = beg; i < end; i++)
+        {
+            _this.addTile(level, i, data[j], raw);
+            j++;
+        }
     };
 
 
@@ -191,9 +215,10 @@ function ApplicationManager(host, drawer)
         }
     };
 
-    this.moveLevel = function(dir_lvl)
+    this.moveLevel = function(dir_lvl, scaled)
     {
-        _this.moveToPosition(dir_lvl);
+        scaled = scaled || true;
+        _this.moveToPosition(dir_lvl, scaled);
     };
 
     this.move = function(dir_lvl, dir_tile)
@@ -211,7 +236,7 @@ function ApplicationManager(host, drawer)
         this.draw();
     };
 
-    this.moveToPosition = function(dir)
+    this.moveToPosition = function(dir, scaled)
     {
         var new_level = this.current.level + dir;
 
@@ -226,13 +251,22 @@ function ApplicationManager(host, drawer)
             {
                 this.log.info("[DELETE] - Deleting level [%d].", i);
                 lev[i] = null;
-                lev[i] = new WindowLevel(i, this.connection, false);
+                lev[i] = new WindowLevel(i, this, false);
             }
         }
 
 
         this.current.level = new_level;
-        this.currLvl().moveScaled(dir);
+
+        if(scaled)
+        {
+            this.currLvl().moveScaled(dir);
+        }
+        else
+        {
+            this.currLvl().movePos(0, 0);
+        }
+
         this.log.info("[INFO] moveToPosition - New position [%d, %d].", this.current.level, this.currIndex());
         this.moveTile(0);
     };

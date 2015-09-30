@@ -226,7 +226,7 @@
                 var diff_x = prev_mouseX - e.clientX;
                 prev_mouseY = e.clientY;
                 prev_mouseX = e.clientX;
-                drawer.scaleY(diff_y * 3);
+                drawer.scaleY(diff_y / 2);
                 manager.movePos(diff_x / 10);
                 drawer.redrawLevel();
             }
@@ -243,16 +243,21 @@
             drawer.drawLevel();
         });
 
-        var grabber = d3.select("#grabber").node();
+        var grb_d3 = d3.select("#grabber");
+        var grabber = grb_d3.node();
 
-        grabber.onmousedown = function (e) {
-            if (!window.config) return;
+        grabber.onmousedown = function(e)
+        {
+            if (!window.config)
+                return;
             drawer.drawTiles = false;
             clicked = true;
             prev_mouseX = e.clientX;
             prev_mouseY = e.clientY;
-
+            e.stopPropagation();
         };
+
+
 
         grabber.onmouseup = function (e) {
             if (!window.config) return;

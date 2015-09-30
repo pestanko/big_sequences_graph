@@ -100,7 +100,6 @@ function D3Drawer(main_container_name) {
     this.reload = function () {
 
         var cont = d3.select(main_container_name);
-        this.setAxisX();
 
         if (cont)
         {
@@ -172,7 +171,6 @@ function D3Drawer(main_container_name) {
 
         if(!level) return;
 
-        this.setAxisX();
 
         var interval = setInterval(function(){
 
@@ -331,16 +329,6 @@ function D3Drawer(main_container_name) {
         this.currentLevel.scale(dir/25);
         this.updateAxes();
     };
-
-    this.setAxisX = function()
-    {
-      /*  this.pos.beg = this.domain.x[0];
-        this.pos.end = this.domain.x[1];
-        if(this.currentLevel)
-            this.currentLevel.update();*/
-    };
-
-
 
     this.drawPath = function(data, chan , mm)
     {

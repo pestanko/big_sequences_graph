@@ -24,14 +24,14 @@ window.icfg =
 
 window.stat =
 {
-    windowSize: function()
+    windowSize: function(lvl)
     {
         if(!window.config)
         {
             return 0;
         }
 
-        var lvl = window.icfg.current.level;
+        lvl = lvl || window.icfg.current.level;
         var max = window.config.levels - 1;
         var diff = max - lvl;
 
@@ -54,6 +54,11 @@ window.stat =
         lvl = lvl || window.icfg.current.level;
         var max = window.config.levels - 1;
         var diff = max - lvl;
+
+        if(diff < 0)
+        {
+            diff = 0;
+        }
 
         var num = window.config.size/window.config.tile_size;
         for(var i = 0; i < diff; i++)
