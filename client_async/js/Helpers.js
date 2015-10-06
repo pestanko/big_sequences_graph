@@ -9,11 +9,11 @@
  */
 window.icfg =
 {
-    current: {level: 0},
-    factor: 10,
-    domain: {x : [0,1000], y: [0,2000]},
-    threshold: 20,
-    position: {beg: 0, end: 1000000}
+        current  : {level: 0},
+        factor   : 10,
+        domain   : {x: [0, 1000], y: [0, 2000]},
+        threshold: 20,
+        position : {beg: 0, end: 1000000}
 };
 
 
@@ -24,98 +24,96 @@ window.icfg =
 
 window.stat =
 {
-    windowSize: function(lvl)
-    {
-        if(!window.config)
+        windowSize: function (lvl)
         {
-            return 0;
-        }
+                if (!window.config) {
+                        return 0;
+                }
 
-        lvl = lvl || window.icfg.current.level;
-        var max = window.config.levels - 1;
-        var diff = max - lvl;
+                lvl = lvl || window.icfg.current.level;
+                var max = window.config.levels - 1;
+                var diff = max - lvl;
 
-        var num = window.config.size/window.config.tile_size;
-        for(var i = 0; i < diff; i++)
+                var num = window.config.size / window.config.tile_size;
+                for (var i = 0; i < diff; i++) {
+                        num = Math.ceil(num / window.config.tile_size);
+                }
+
+                var lvl_size = num;
+                var avs = window.config.active_window_size;
+            if (avs < lvl_size) {
+                return avs;
+            }
+                return lvl_size;
+        },
+
+        levelTiles: function (lvl)
         {
-            num = Math.ceil(num/window.config.tile_size);
-        }
+                if (!window.config) return 0;
+                lvl = lvl || window.icfg.current.level;
+                var max = window.config.levels - 1;
+                var diff = max - lvl;
 
-        var lvl_size = num;
-        var avs = window.config.active_window_size;
-        if(avs < lvl_size)
-            return avs;
-        return lvl_size;
-    },
+                if (diff < 0) {
+                        diff = 0;
+                }
 
-    levelTiles: function(lvl)
-    {
-        if(!window.config) return 0;
-        lvl = lvl || window.icfg.current.level;
-        var max = window.config.levels - 1;
-        var diff = max - lvl;
+                var num = window.config.size / window.config.tile_size;
+                for (var i = 0; i < diff; i++) {
+                        num = Math.ceil(num / window.config.tile_size);
+                }
+                return num;
+        },
 
-        if(diff < 0)
+
+        logging: function ()
         {
-            diff = 0;
-        }
+                console.log.apply(console, arguments);
 
-        var num = window.config.size/window.config.tile_size;
-        for(var i = 0; i < diff; i++)
+        },
+
+        convertToTile: function (position, curr_lvl)
         {
-            num = Math.ceil(num/window.config.tile_size);
-        }
-        return num;
-    },
+                if (!window.config) return 0;
+                curr_lvl = curr_lvl || window.icfg.current.level;
+                var size = window.config.size;
+                var max = window.config.levels - 1;
+                var diff = max - curr_lvl;
 
+                var num = window.config.size / window.config.tile_size;
+                for (var i = 0; i < diff; i++) {
+                        num = Math.ceil(num / window.config.tile_size);
+                }
 
-    logging: function() {
-        console.log.apply(console, arguments);
+                var tile_pos = position / (size / num);
+                return Math.floor(tile_pos);
+        },
 
-           },
-
-    convertToTile: function(position, curr_lvl)
-    {
-        if(!window.config) return 0;
-        curr_lvl = curr_lvl || window.icfg.current.level;
-        var size = window.config.size;
-        var max = window.config.levels - 1;
-        var diff = max - curr_lvl;
-
-        var num = window.config.size/window.config.tile_size;
-        for(var i = 0; i < diff; i++)
+        tileToPosition: function (lvl, index)
         {
-            num = Math.ceil(num/window.config.tile_size);
+                if (!window.config) return 0;
+                var max = window.config.levels;
+                var diff = max - lvl;
+                return (Math.pow(window.config.tile_size, diff)) * index;
+        },
+
+        domainXSize: function ()
+        {
+                var domain = window.icfg.domain;
+                return domain.x[1] - domain.x[0];
+        },
+
+        domainYSize: function ()
+        {
+                var domain = window.icfg.domain;
+                return domain.y[1] - domain.y[0];
+        },
+
+        domainXToTiles: function ()
+        {
+                var tiles = this.domainXSize() / this.levelTileSize();
+                return tiles;
         }
-
-        var tile_pos = position / (size / num);
-        return Math.floor(tile_pos);
-    },
-
-    tileToPosition: function(lvl, index)
-    {
-        if(!window.config) return 0;
-        var max = window.config.levels;
-        var diff = max - lvl;
-        return (Math.pow(window.config.tile_size, diff)) * index;
-    },
-
-    domainXSize : function()
-    {
-        var domain = window.icfg.domain;
-        return domain.x[1] - domain.x[0];
-    },
-
-    domainYSize : function () {
-        var domain = window.icfg.domain;
-        return domain.y[1] - domain.y[0];
-    },
-
-    domainXToTiles : function()
-    {
-        var tiles = this.domainXSize() / this.levelTileSize();
-        return tiles;
-    }
 };
 
 /**
@@ -125,31 +123,31 @@ window.stat =
 
 function SimpleLogger()
 {
-    this.disabled = {};
-    var _this = this;
-    this.log = window.stat.logging;
-    this.error = function()
-    {
-        if(this.disabled.error) return;
-        this.log.apply(null, arguments);
-    };
-    this.warn = function()
-    {
-        if(this.disabled.warn) return;
-        this.log.apply(null,arguments);
-    };
-    this.debug = function()
-    {
-        if(this.disabled.debug) return;
-        this.log.apply(null, arguments);
-    };
-    this.info = function()
-    {
-        if(this.disabled.info) return;
-        this.log.apply(null,arguments);
-    };
-    //this.disabled.error = 1;
-    //this.disabled.warning = 1;
-    //this.disabled.info = 1;
-    //this.disabled.debug = 1;
+        this.disabled = {};
+        var _this = this;
+        this.log = window.stat.logging;
+        this.error = function ()
+        {
+                if (this.disabled.error) return;
+                this.log.apply(null, arguments);
+        };
+        this.warn = function ()
+        {
+                if (this.disabled.warn) return;
+                this.log.apply(null, arguments);
+        };
+        this.debug = function ()
+        {
+                if (this.disabled.debug) return;
+                this.log.apply(null, arguments);
+        };
+        this.info = function ()
+        {
+                if (this.disabled.info) return;
+                this.log.apply(null, arguments);
+        };
+        //this.disabled.error = 1;
+        //this.disabled.warning = 1;
+        //this.disabled.info = 1;
+        //this.disabled.debug = 1;
 }
