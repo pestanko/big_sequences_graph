@@ -14,11 +14,10 @@ var big_graph = SAGE2_App.extend(
             this.manager = new ApplicationManager(this.host, this.drawer);
             this.element.style.backgroundColor = "#DDD";
 
-            this.initWidgets();
-
+            this.initializeWidgets();
         },
 
-        initWidgets: function () {
+        initializeWidgets: function () {
             this.controls.addButton({type: "rewind", position: 1, identifier: "Back"});
             this.controls.addButton({type: "fastforward", position: 2, identifier: "Forward"});
 
@@ -57,11 +56,12 @@ var big_graph = SAGE2_App.extend(
             if (eventType === "pointerPress" && (data.button === "left"))
             {
 
-                var x = position.x + this.element.contentDocument.getElementsByTagName("body")[0].scrollLeft;
-                var y = position.y + this.element.contentDocument.getElementsByTagName("body")[0].scrollTop;
+                var x = position.x + this.element.getElementsByTagName("svg")[0].scrollLeft;
+                
+                var y = position.y + this.element.getElementsByTagName("svg")[0].scrollTop;
 
                 console.log(x, y);
-                this.element.contentDocument.elementFromPoint(x, y).click();
+                this.element.elementFromPoint(x, y).click();
             }
             if (eventType === "pointerMove")
             {
@@ -72,7 +72,7 @@ var big_graph = SAGE2_App.extend(
 
             if (eventType === "pointerScroll")
             {
-                this.manager.scaleX(data.wheelDelta);
+                this.drawer.scaleX(data.wheelDelta);
             }
 
 
@@ -99,13 +99,13 @@ var big_graph = SAGE2_App.extend(
                         this.manager.moveLevel(-1);
                         break;
                     case "ZoomIn":
-                        this.manager.scaleX(2);
+                       this.manager.scaleX(2);
                         break;
                     case "ZoomOut":
                         this.manager.scaleY(2);
                         break;
                     case "Reload":
-                        this.drawer.reload();
+                        this.manager.reload();
                         break;
                     default:
                         console.log("No handler for:", data.identifier);

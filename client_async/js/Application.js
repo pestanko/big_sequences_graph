@@ -66,11 +66,11 @@ function ApplicationManager(host, drawer)
         var levels = this.levels;
         if(index < 0)
         {
-            return levels[0];
+            return null;
         }
         if(index >= levels.length)
         {
-            return levels[levels.length - 1];
+            return null;
         }
         return levels[index];
 
@@ -215,10 +215,15 @@ function ApplicationManager(host, drawer)
         }
     };
 
-    this.moveLevel = function(dir_lvl, scaled)
+    this.moveLevel = function(dir_lvl)
     {
-        scaled = scaled || true;
-        _this.moveToPosition(dir_lvl, scaled);
+        _this.moveToPosition(dir_lvl);
+    };
+
+    this.stepLevel = function(dir)
+    {
+        this.moveLevelClean(dir);
+        this.movePos(0);
     };
 
     this.move = function(dir_lvl, dir_tile)
@@ -236,7 +241,7 @@ function ApplicationManager(host, drawer)
         this.draw();
     };
 
-    this.moveToPosition = function(dir, scaled)
+    this.moveLevelClean = function(dir)
     {
         var new_level = this.current.level + dir;
 
@@ -255,20 +260,33 @@ function ApplicationManager(host, drawer)
             }
         }
 
-
         this.current.level = new_level;
-
-        if(scaled)
-        {
-            this.currLvl().moveScaled(dir);
-        }
-        else
-        {
-            this.currLvl().movePos(0, 0);
-        }
-
-        this.log.info("[INFO] moveToPosition - New position [%d, %d].", this.current.level, this.currIndex());
-        this.moveTile(0);
     };
+
+    this.moveToPosition = function(dir)
+    {
+        this.moveLevelClean(dir);
+        this.currLvl().moveScaled();
+        this.log.info("[INFO] moveToPosition - New position [%d, %d].", this.current.level, this.currIndex());
+
+    };
+
+    this.scaleX = function(dir)
+    {
+        this.currLvl().scale(dir/25);
+        this.drawer.updateAxes();
+    };
+
+    this.scaleY = function(dir)
+    {
+        this.drawer.scaleY(dir);
+    };
+
+
+    this.reload = function()
+    {
+      this.drawer.reload();
+    };
+
 }
 

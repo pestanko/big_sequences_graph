@@ -323,12 +323,6 @@ function D3Drawer(main_container_name) {
         this.updateAxes();
     };
 
-    this.scaleX = function(dir)
-    {
-
-        this.currentLevel.scale(dir/25);
-        this.updateAxes();
-    };
 
     this.drawPath = function(data, chan , mm)
     {

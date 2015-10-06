@@ -171,11 +171,11 @@
 
         d3.select("#scaleUp").on("click", function () {
             if (!manager) return;
-            drawer.scaleX(1000);
+            manager.scaleX(1000);
         });
         d3.select("#scaleDown").on("click", function () {
             if (!manager) return;
-            drawer.scaleX(-1000);
+            manager.scaleX(-1000);
         });
 
 
@@ -235,7 +235,7 @@
         $('#grabber').mousewheel(function (event) {
             if (!window.config) return;
             //console.log(event.deltaX, event.deltaY, event.deltaFactor);
-            drawer.scaleX(-event.deltaY * event.deltaFactor);
+            manager.scaleX(-event.deltaY * event.deltaFactor);
             if (drawer.deltaX)
             {
                 drawer.scaleY(event.deltaX * event.deltaFactor);
@@ -246,17 +246,19 @@
         var grb_d3 = d3.select("#grabber");
         var grabber = grb_d3.node();
 
-        grabber.onmousedown = function(e)
-        {
+        grabber.onmousedown = function (e) {
             if (!window.config)
+            {
                 return;
+            }
             drawer.drawTiles = false;
             clicked = true;
             prev_mouseX = e.clientX;
             prev_mouseY = e.clientY;
-            e.stopPropagation();
-        };
+            if (e.stopPropagation) e.stopPropagation();
+            if (e.preventDefault) e.preventDefault();
 
+        };
 
 
         grabber.onmouseup = function (e) {
@@ -340,8 +342,6 @@
                 // left arrow
                 if (!manager) return;
                 _this.moveByPos(-1);
-
-
             }
             else if (e.keyCode == '39')
             {
@@ -350,10 +350,7 @@
                 _this.moveByPos(+1);
 
             }
-
         };
-
-
     };
 
 

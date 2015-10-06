@@ -230,7 +230,6 @@ function ApplicationManager(host, drawer)
             }
         }
 
-
         this.current.level = new_level;
         this.currLvl().moveScaled(dir);
         this.log.info("[INFO] moveToPosition - New position [%d, %d].", this.current.level, this.currIndex());

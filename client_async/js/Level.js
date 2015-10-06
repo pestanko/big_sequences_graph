@@ -46,6 +46,7 @@ function WindowLevel(level, manager, raw) {
     var pos_tile = window.stat.convertToTile;
 
 
+
     var pos_int = function (pos) {
         pos = pos || _this.pos;
         return {beg: pos_tile(pos.beg), end: pos_tile(pos.end)};
@@ -54,6 +55,10 @@ function WindowLevel(level, manager, raw) {
     var max = window.config.levels - 1;
     var diff = max - level;
     this.tileSize = Math.pow(window.config.tile_size, diff + 1);
+
+    this.max_size = window.config.active_window_size * this.tileSize * 2;
+
+    this.log.debug("[DEBUD] Level [%d] has max size: %d", this.level, this.max_size);
 
 
     this.deleteTile = function (index) {
@@ -239,22 +244,21 @@ function WindowLevel(level, manager, raw) {
 
         var nextLevel = manager.getLevel(this.level + 1); // Smaller numbers
 
-        var low = stat.windowSize(level + 1) * nextLevel.tileSize; // Smaller numbers
-
-        var w_size = stat.windowSize();
-        var up = w_size * this.tileSize;
-
+        var up = this.max_size - 10;
+        var low = 0;
+        if(nextLevel)
+            low = nextLevel.max_size;
 
         if (diff > up)
         {
             if (this.level <= 0) return;
-            manager.moveLevel(-1, false);
+            manager.stepLevel(-1);
 
         }
         else if (diff < low)
         {
-            if (this.level > (window.config.levels - 1)) return;
-            manager.moveLevel(+1, false);
+            //if (this.level > (window.config.levels - 1)) return;
+            manager.stepLevel(+1);
         }
 
 
@@ -274,9 +278,11 @@ function WindowLevel(level, manager, raw) {
         this.movePos(dir, dir);
     };
 
+
+
     this.moveScaled = function (up_down) {
 
-        /*var beg = this.pos.beg;
+        var beg = this.pos.beg;
         var end = this.pos.end;
         var std_w_size = window.stat.windowSize();
         var w_size_limit = std_w_size * 3.1;
@@ -297,9 +303,9 @@ function WindowLevel(level, manager, raw) {
             end = beg + w_size_pos;
         }
 
-        var diff_e = end - this.pos.end;*/
+        var diff_e = end - this.pos.end;
 
-        this.movePos(0, 0);
+        this.movePos(0, diff_e);
 
     };
 
