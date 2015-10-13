@@ -5,7 +5,6 @@
  * @licence MIT
  */
 
-
 /**
  *
  * @param host - remote server with data
@@ -15,27 +14,39 @@
 
 function ApplicationManager(host, drawer)
 {
+
         this.connection = new ConnectionManager(host);
         this.current = window.icfg.current;
-        window.config = null;
         this.log = Logger;
-
-        var _this = this;
         this.drawer = drawer;
-
         this.host = host || "ws://localhost:10888";
         this.levels = null;
 
+        window.config = null;
+
+        var _this = this;
+
+        /**
+         * Gets current level
+         * @returns {WindowLevel}
+         */
         this.currLvl = function ()
         {
                 return this.levels[this.current.level];
         };
 
+        /**
+         * Gets current low index of tile
+         * @returns {*}
+         */
         this.currIndex = function ()
         {
                 return this.currLvl().lowIndex();
         };
 
+        /**
+         * Load buffer of current level and call draw
+         */
         this.internal_load = function ()
         {
                 if (!this.levels) {
@@ -46,6 +57,10 @@ function ApplicationManager(host, drawer)
                 _this.draw();
         };
 
+        /**
+         * Interval that waits for window config.
+         * @type {number}
+         */
         var interval = setInterval(
             function ()
             {
@@ -58,10 +73,13 @@ function ApplicationManager(host, drawer)
                     }
             }, 100);
 
-
+        /**
+         * Gets level on spec. index
+         * @param index - level index
+         * @returns {*}
+         */
         this.getLevel = function (index)
         {
-
                 var levels = this.levels;
 
                 if (index < 0) {
@@ -71,11 +89,14 @@ function ApplicationManager(host, drawer)
                 if (index >= levels.length) {
                         return null;
                 }
-                return levels[index];
 
+                return levels[index];
         };
 
-
+        /**
+         * Window size for spec. width - calculate by draw window size - pixels
+         * @param width - Width in pixels
+         */
         this.calculateWindowSize = function (width)
         {
                 var wc = window.config;
@@ -86,7 +107,9 @@ function ApplicationManager(host, drawer)
                 wc.active_window_size = tiles;
         };
 
-
+        /**
+         * Initializes levels
+         */
         this.initLevels = function ()
         {
                 _this.levels = new Array(window.config.levels);
@@ -96,11 +119,20 @@ function ApplicationManager(host, drawer)
                         this.levels[i] = windowLevel;
                         windowLevel.moveLevel = this.moveLevel;
                 }
-
         };
 
+        /**
+         * Calculates how many tiles are on spec. level
+         * @type {Function}
+         */
         this.countLevelSize = window.stat.levelTiles;
 
+        /**
+         * Function that test if tile on spec. level and index exists and is loaded
+         * @param level
+         * @param index
+         * @returns {boolean} - if exists true, else false
+         */
         this.contains = function (level, index)
         {
                 if (!_this.levels) {
@@ -115,6 +147,13 @@ function ApplicationManager(host, drawer)
                 return false;
         };
 
+        /**
+         * Adds tile to level spec, on spec. index, with spec. data and with flag if it is raw
+         * @param level
+         * @param index
+         * @param data
+         * @param raw
+         */
         this.addTile = function (level, index, data, raw)
         {
                 raw = raw || false;
@@ -125,13 +164,22 @@ function ApplicationManager(host, drawer)
                 lvl.requestTiles = this.connection.getTile;
         };
 
-        function add_tile_intern (message)
+        /**
+         * Intern function to add file
+         * @param message
+         */
+        function add_tile_intern(message)
         {
                 _this.addTile(message.level, message.index, message.data, message.raw);
         }
 
         this.connection.receivedTile = add_tile_intern;
 
+        /**
+         * When arrives multiple tiles.
+         * Implementation of connection manager method pointer.
+         * @param message - message containing tiles data and info
+         */
         this.connection.receivedTiles = function (message)
         {
                 var level = message.level;
@@ -147,13 +195,21 @@ function ApplicationManager(host, drawer)
                 }
         };
 
-
+        /**
+         * Moving by tile
+         * @param dir_num
+         */
         this.moveTile = function (dir_num)
         {
                 this.currLvl().moveTile(dir_num);
                 this.draw();
         };
 
+        /**
+         * Move to specified index
+         * @param level
+         * @param index
+         */
         this.moveTo = function (level, index)
         {
                 level = level | this.current.level;
@@ -167,13 +223,20 @@ function ApplicationManager(host, drawer)
                 this.draw();
         };
 
+        /**
+         * Draws graph from current level
+         */
         this.draw = function ()
         {
                 var level = this.levels[this.current.level];
                 this.drawer.drawLevel(level);
         };
 
-
+        /**
+         * Gets tile at spec. level and on spec. index
+         * @param level
+         * @param index
+         */
         this.getTile = function (level, index)
         {
                 var number_tiles = window.config.size / window.config.tile_size;
@@ -206,17 +269,30 @@ function ApplicationManager(host, drawer)
                 }
         };
 
+        /**
+         * Move to level
+         * @param dir_lvl - negative - level up, positive - level down
+         */
         this.moveLevel = function (dir_lvl)
         {
                 _this.moveToPosition(dir_lvl);
         };
 
+        /**
+         * TODO
+         * @param dir
+         */
         this.stepLevel = function (dir)
         {
                 this.moveLevelClean(dir);
                 this.movePos(0);
         };
 
+        /**
+         * Move function - move level and tile
+         * @param dir_lvl - direction level
+         * @param dir_tile - direction index
+         */
         this.move = function (dir_lvl, dir_tile)
         {
                 var d_lvl = this.currIndex() + dir_lvl;
@@ -233,12 +309,20 @@ function ApplicationManager(host, drawer)
                 }
         };
 
+        /**
+         * Move to position
+         * @param dir
+         */
         this.movePos = function (dir)
         {
                 this.currLvl().moveVariable(dir, dir);
                 this.draw();
         };
 
+        /**
+         * Helper function - move with cleaning leves
+         * @param dir - direction to move
+         */
         this.moveLevelClean = function (dir)
         {
                 var new_level = this.current.level + dir;
@@ -249,7 +333,6 @@ function ApplicationManager(host, drawer)
                 else if (new_level >= this.levels.length - 1) {
                         new_level = this.levels.length - 1;
                 }
-
 
                 for (var i = 1; i < _this.levels.length; i++) {
                         var lev = _this.levels;
@@ -263,6 +346,10 @@ function ApplicationManager(host, drawer)
                 this.current.level = new_level;
         };
 
+        /**
+         * Move to position
+         * @param dir - direction
+         */
         this.moveToPosition = function (dir)
         {
                 this.moveLevelClean(dir);
@@ -271,22 +358,31 @@ function ApplicationManager(host, drawer)
                 this.draw();
         };
 
+        /**
+         * Scale by axis X
+         * @param dir
+         */
         this.scaleX = function (dir)
         {
                 this.currLvl().scale(dir / 25);
                 this.drawer.updateAxes();
         };
 
+        /**
+         * Scale by axis Y
+         * @param dir
+         */
         this.scaleY = function (dir)
         {
                 this.drawer.scaleY(dir);
         };
 
-
+        /**
+         * Reload View - no load data
+         */
         this.reload = function ()
         {
                 this.drawer.reload();
         };
-
 }
 

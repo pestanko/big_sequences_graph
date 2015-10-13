@@ -9,302 +9,326 @@
 function WindowLevel(level, manager, raw)
 {
 
-    // Size of level - Number of tiles
-    var lvl_size = window.stat.levelTiles(level);
+        // Size of level - Number of tiles
+        var lvl_size = window.stat.levelTiles(level);
+        // Converts coordinates to tile index
+        var pos_tile = window.stat.convertToTile;
+        // Object containing indexes of requested tiles
+        var requested_tiles = {};
+        // Self pointer
+        var _this = this;
 
-    var requested_tiles = {};
+        // Array of Tiles
+        this.tiles = new Array(lvl_size);
+        //Level id
+        this.level = level;
+        //Connection manager
+        this.connection = manager.connection;
+        // Logging tool
+        this.log = Logger;
+        // Size of one tile
+        this.tileSize = Math.pow(window.config.tile_size, (window.config.levels - level));
+        // Maximum size in coordinates
+        this.max_size = window.config.active_window_size * this.tileSize * 2;
+        // Position in graph
+        this.pos = window.icfg.position;
+        // Raw data
+        this.raw = raw || false;
 
-    // Array of Tiles
-    this.tiles = new Array(lvl_size);
-    //Level id
-    this.level = level;
-    //Connection manager
-    this.connection = manager.connection;
-    // Self pointer
-    var _this = this;
-    // Logging tool
-    this.log = Logger;
+        this.log.debug("[DEBUG] Level [%d] has max size: %d", this.level, this.max_size);
 
+        /**
+         *  Gets window size
+         * @returns Window size
+         */
+        this.window_size = function ()
+        {
+                var int = {beg: pos_tile(this.pos.beg), end: pos_tile(this.pos.end)};
+                var diff = (int.end - int.beg);
+                if (diff < 0) return window.stat.windowSize();
+                if (diff > 2 * window.stat.windowSize()) {
+                        return window.stat.windowSize() * 2;
+                }
+                return diff;
+        };
 
-    // function to calculate window size
-    this.window_size = function ()
-    {
-        var int = pos_int();
-        var diff = (int.end - int.beg);
-        if (diff < 0) return window.stat.windowSize();
-        if (diff > 2 * window.stat.windowSize()) {
-            return window.stat.windowSize() * 2;
-        }
-        return diff;
-    };
-    // Current interval in tile indexes
-    // previous interval in coordinates
-    this.prev_pos = {beg: 0, end: 0};
-    this.pos = window.icfg.position;
-
-    this.raw = raw || false;
-
-    var pos_tile = window.stat.convertToTile;
-
-
-    var pos_int = function (pos)
-    {
-        pos = pos || _this.pos;
-        return {beg: pos_tile(pos.beg), end: pos_tile(pos.end)};
-    };
-
-    var max = window.config.levels - 1;
-    var diff = max - level;
-    this.tileSize = Math.pow(window.config.tile_size, diff + 1);
-
-    this.max_size = window.config.active_window_size * this.tileSize * 2;
-
-    this.log.debug("[DEBUD] Level [%d] has max size: %d", this.level, this.max_size);
-
-
-    this.deleteTile = function (index)
-    {
-        this.tiles[index] = null;
-    };
-
-    this.deleteTiles = function (begin, end)
-    {
-        for (var i = begin; i < end; i++) {
-            this.deleteTile(i);
-        }
-    };
-
-
-    this.upIndex = function (index)
-    {
-        index = index || pos_tile(this.pos.end);
-        var up = index;
-        if (up >= lvl_size) {
-            return lvl_size
-        }
-        else {
-            return up + 1;
-        }
-    };
-
-    this.lowIndex = function (index)
-    {
-        if (!index) {
-            index = pos_tile(this.pos.beg);
-        }
-        var min = lvl_size - _this.window_size();
-        return (index > min) ? min : index;
-    };
-
-    this.lowBuffIndex = function (index)
-    {
-        index = this.lowIndex(index);
-        var low_size = Math.floor(this.window_size() * 1);
-
-        return index - low_size;
-    };
-
-    this.upBuffIndex = function (index)
-    {
-        index = this.upIndex(index);
-        var up_size = Math.ceil(this.window_size() * 1);
-
-        return index + up_size;
-    };
-
-    this.moveTo = function ()
-    {
-        var oldWinSize = this.window_size();
-        this.movePos(0, oldWinSize * this.tileSize);
-    };
-
-    this.addTile = function (index, data)
-    {
-        var tile_size = window.config.tile_size;
-        var init_pos = window.stat.tileToPosition(level, index);
-        var one_step = this.tileSize / tile_size;
-        var number_of_channels = data.length;
-        var tile = new Array(number_of_channels);
-
-        delete requested_tiles[index];
-
-
-        for (var i = 0; i < number_of_channels; i++) { // Each channels{
-            tile[i] = new Array(tile_size);
-            var channel = tile[i];
-            var position = init_pos;
-            var tile_data = null;
-            var data_ch = data[i];
-            for (var j = 0; j < tile_size; j++) {
-                if (this.raw) {
-                    tile_data = {x: position, y: data_ch[j]};
+        /**
+         * Returns Up index of active window (interval that is shown)
+         * Also check bounds and return max or min value
+         * @param index - UpIndex
+         * @returns UpIndex
+         */
+        this.upIndex = function (index)
+        {
+                index = index || pos_tile(this.pos.end);
+                var up = index;
+                if (up >= lvl_size) {
+                        return lvl_size
                 }
                 else {
-                    var data_min = data_ch[0];
-                    var data_max = data_ch[1];
-                    tile_data = {x: position, min: data_min[j], max: data_max[j]};
+                        return up + 1;
                 }
-                channel[j] = tile_data;
-                position += one_step;
-            }
-        }
+        };
+        /**
+         * Returns Low index of active window (interval that is shown)
+         * Also check bounds and return max or min value
+         * @param index - Low Index
+         * @returns Low Index
+         */
+        this.lowIndex = function (index)
+        {
+                if (!index) {
+                        index = pos_tile(this.pos.beg);
+                }
+                var min = lvl_size - _this.window_size();
+                return (index > min) ? min : index;
+        };
 
-        this.tiles[index] = tile;
+        /**
+         * Returns Low buffer index before active window (interval that is preloaded)
+         * Also check bounds and return max or min value
+         * @param index - Low buffer Index
+         * @returns Low buffer Index
+         */
+        this.lowBuffIndex = function (index)
+        {
+                index = this.lowIndex(index);
+                var low_size = Math.floor(this.window_size() * 1);
 
-    };
+                return index - low_size;
+        };
 
-    this.requestTile = function (index)
-    {
-        if (!this.getTile(index) && !requested_tiles[index]) {
-            if (index < lvl_size && index >= 0) {
-                this.connection.getTile(this.level, index);
-                requested_tiles[index] = true;
-            }
-        }
-    };
+        /**
+         * Returns Up buffer index behind active window (interval that is preloaded)
+         * Also check bounds and return max or min value
+         * @param index - Up buffer Index
+         * @returns Up buffer Index
+         */
+        this.upBuffIndex = function (index)
+        {
+                index = this.upIndex(index);
+                var up_size = Math.ceil(this.window_size() * 1);
 
-    this.loadBuffer = function ()
-    {
-        var low = this.lowIndex();
-        var up = this.upIndex();
-        var upB = this.upBuffIndex();
-        var lowB = this.lowBuffIndex();
-        var i;
-        for (i = low; i < up + 1; i++) { // Window interval
-            this.requestTile(i)
-        }
+                return index + up_size;
+        };
 
-        for (i = up; i < upB + 1; i++) {
-            this.requestTile(i)
-        }
+        /**
+         * Adding tile to Level Tile holder
+         * @param index - index of tile
+         * @param data - data of tile
+         */
+        this.addTile = function (index, data)
+        {
+                var tile_size = window.config.tile_size;
+                var init_pos = window.stat.tileToPosition(level, index);
+                var one_step = this.tileSize / tile_size;
+                var number_of_channels = data.length;
+                var tile = new Array(number_of_channels);
 
-        for (i = lowB; i < low; i++) {
-            this.requestTile(i)
-        }
-    };
+                delete requested_tiles[index];
 
+                for (var i = 0; i < number_of_channels; i++) { // Each channels{
+                        tile[i] = new Array(tile_size);
+                        var channel = tile[i];
+                        var position = init_pos;
+                        var tile_data = null;
+                        var data_ch = data[i];
+                        for (var j = 0; j < tile_size; j++) {
+                                if (this.raw) {
+                                        tile_data = {x: position, y: data_ch[j]};
+                                }
+                                else {
+                                        var data_min = data_ch[0];
+                                        var data_max = data_ch[1];
+                                        tile_data = {x: position, min: data_min[j], max: data_max[j]};
+                                }
+                                channel[j] = tile_data;
+                                position += one_step;
+                        }
+                }
 
-    this.getTile = function (index)
-    {
-        if (index < 0 || index > lvl_size) return null;
-        return this.tiles[index];
-    };
+                this.tiles[index] = tile;
 
-    this.toTile = function (index)
-    {
-        var direction = (index - this.interval.beg);
-        this.moveTile(direction);
-    };
+        };
 
-    this.scale = function (dir)
-    {
-        this.moveVariable(-dir, dir);
-    };
+        /**
+         * Request tile from remote server
+         * @param index - index of Tile
+         */
+        this.requestTile = function (index)
+        {
+                if (!this.getTile(index) && !requested_tiles[index]) {
+                        if (index < lvl_size && index >= 0) {
+                                this.connection.getTile(this.level, index);
+                                requested_tiles[index] = true;
+                        }
+                }
+        };
 
-    this.moveVariable = function (dir_beg, dir_end)
-    {
-        var oneStep = this.tileSize / window.config.tile_size;
+        /**
+         * This metod will request all tiles in active window and in buffers
+         */
+        this.loadBuffer = function ()
+        {
+                var low = this.lowIndex();
+                var up = this.upIndex();
+                var upB = this.upBuffIndex();
+                var lowB = this.lowBuffIndex();
+                var i;
+                for (i = low; i < up + 1; i++) { // Window interval
+                        this.requestTile(i)
+                }
 
-        dir_beg *= (oneStep / 2);
-        dir_end *= (oneStep / 2);
-        this.movePos(dir_beg, dir_end);
-    };
+                for (i = up; i < upB + 1; i++) {
+                        this.requestTile(i)
+                }
 
+                for (i = lowB; i < low; i++) {
+                        this.requestTile(i)
+                }
+        };
 
-    this.movePos = function (dir_beg, dir_end)
-    {
-        var max_size = window.config.size;
+        /**
+         * Gets tile from array
+         * @param index
+         * @returns null if not exists, tile on spec. index
+         */
+        this.getTile = function (index)
+        {
+                if (index < 0 || index > lvl_size) return null;
+                return this.tiles[index];
+        };
 
-        var p_beg = this.pos.beg;
-        var p_end = this.pos.end;
+        /**
+         * Move window to spec. tile index
+         * @param index - Tile index
+         */
+        this.toTile = function (index)
+        {
+                var direction = (index - this.interval.beg);
+                this.moveTile(direction);
+        };
 
+        /**
+         * Scale active window in spec. interval
+         * @param dir - direction in which to scale
+         */
+        this.scale = function (dir)
+        {
+                this.moveVariable(-dir, dir);
+        };
 
-        var beg = p_beg + dir_beg,
-            end = p_end + dir_end;
+        /**
+         * Move active window bounds in directions.
+         * Movement speed is affected by one step
+         * @param dir_beg - move begin of window in direction
+         * @param dir_end - move end of window in direction
+         */
+        this.moveVariable = function (dir_beg, dir_end)
+        {
+                var oneStep = this.tileSize / window.config.tile_size;
 
+                dir_beg *= (oneStep / 2);
+                dir_end *= (oneStep / 2);
+                this.movePos(dir_beg, dir_end);
+        };
 
-        if (beg >= end) {
-            this.log.debug("[DEBUG]{STOP} - Begin is greater than end.");
-            end = beg + this.tileSize;
-        }
+        /**
+         * Move to position - Main function to move by pos - not scaled
+         * @param dir_beg
+         * @param dir_end
+         */
+        this.movePos = function (dir_beg, dir_end)
+        {
+                var max_size = window.config.size;
 
-        if (beg < 0) {
-            this.log.debug("[DEBUG]{STOP} - Begin is negative.");
-            beg = 0;
-        }
-        if (end > max_size) {
-            this.log.debug("[DEBUG]{STOP} - End is greater than max_size.");
-            end = max_size;
-        }
+                var p_beg = this.pos.beg;
+                var p_end = this.pos.end;
 
-        this.pos.beg = beg;
-        this.pos.end = end;
+                var beg = p_beg + dir_beg;
+                var end = p_end + dir_end;
 
+                if (beg >= end) {
+                        this.log.debug("[DEBUG]{STOP} - Begin is greater than end.");
+                        end = beg + this.tileSize;
+                }
 
-        var diff = end - beg; // Size of interval
+                if (beg < 0) {
+                        this.log.debug("[DEBUG]{STOP} - Begin is negative.");
+                        beg = 0;
+                }
+                if (end > max_size) {
+                        this.log.debug("[DEBUG]{STOP} - End is greater than max_size.");
+                        end = max_size;
+                }
 
-        var nextLevel = manager.getLevel(this.level + 1); // Smaller numbers
+                this.pos.beg = beg;
+                this.pos.end = end;
 
-        var up = this.max_size + 10;
-        var low = 0;
-        if (nextLevel) {
-            low = nextLevel.max_size;
-        }
+                var diff = end - beg; // Size of interval
+                var nextLevel = manager.getLevel(this.level + 1); // Smaller numbers
+                var up = this.max_size + 10;
+                var low = 0;
 
-        if (diff > up) {
-            if (this.level <= 0) return;
-            manager.stepLevel(-1);
+                if (nextLevel) {
+                        low = nextLevel.max_size;
+                }
 
-        }
-        else if (diff < low) {
-            //if (this.level > (window.config.levels - 1)) return;
-            manager.stepLevel(+1);
-        }
+                if (diff > up) {
+                        if (this.level <= 0) return;
+                        manager.stepLevel(-1);
 
+                }
+                else if (diff < low) {
+                        //if (this.level > (window.config.levels - 1)) return;
+                        manager.stepLevel(+1);
+                }
 
-        this.loadBuffer();
-        this.prev_pos = this.pos;
+                this.loadBuffer();
 
-    };
+        };
 
-    this.update = function ()
-    {
-        var move_beg = this.pos.beg - this.prev_pos.beg;
-        var move_end = this.pos.end - this.prev_pos.end;
-        this.movePos(move_beg, move_end);
-    };
+        /**
+         * Move in one direction - not scale
+         * @param dir - direction (negative - left , positive - right)
+         */
+        this.move = function (dir)
+        {
+                dir *= (this.tileSize);
+                this.movePos(dir, dir);
+        };
 
-    this.move = function (dir)
-    {
-        dir *= (this.tileSize);
-        this.movePos(dir, dir);
-    };
+        /**
+         * Move to new level - scaled on max size of level
+         * @param up_down - up scaled of down scaled
+         */
+        this.moveScaled = function (up_down)
+        {
 
+                var beg = this.pos.beg;
+                var end = this.pos.end;
 
-    this.moveScaled = function (up_down)
-    {
+                if (up_down > 0) {
+                        end = beg + this.max_size - 15;
+                }
+                else {
+                        end = beg + this.max_size + 15;
+                }
 
-        var beg = this.pos.beg;
-        var end = this.pos.end;
+                var diff_e = end - this.pos.end;
 
-        if (up_down > 0) {
-            end = beg + this.max_size - 15;
-        }
-        else {
-            end = beg + this.max_size + 15;
-        }
+                this.movePos(0, diff_e);
 
-        var diff_e = end - this.pos.end;
+        };
 
-        this.movePos(0, diff_e);
-
-    };
-
-
-    this.moveTile = function (dir)
-    {
-        this.movePos(dir * this.tileSize, dir * this.tileSize);
-    };
+        /**
+         * Moves window to new position by direction
+         * @param dir - if negative, moving left, if positive, moving right
+         */
+        this.moveTile = function (dir)
+        {
+                this.movePos(dir * this.tileSize, dir * this.tileSize);
+        };
 
 }
 

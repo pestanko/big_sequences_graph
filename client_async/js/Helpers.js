@@ -1,7 +1,6 @@
 /**
- * Created by wermington on 9/7/15.
+ * Created by Peter Stanko on 9/7/15.
  */
-
 
 /**
  * Internal config of application
@@ -16,14 +15,18 @@ window.icfg =
         position : {beg: 0, end: 1000000}
 };
 
-
 /**
- * Internal global helper functions based on global configureation
+ * Internal global helper functions based on global configuration
  * @type {{windowSize: Function, levelTiles: Function, levelTileSize: Function, logging: Function, convertToTile: Function, tileToPosition: Function, domainXSize: Function, domainYSize: Function, domainXToTiles: Function}}
  */
 
 window.stat =
 {
+        /**
+         * Calculates windows size in TILES on spec. level
+         * @param lvl - Level
+         * @returns {number}
+         */
         windowSize: function (lvl)
         {
                 if (!window.config) {
@@ -41,12 +44,17 @@ window.stat =
 
                 var lvl_size = num;
                 var avs = window.config.active_window_size;
-            if (avs < lvl_size) {
-                return avs;
-            }
+                if (avs < lvl_size) {
+                        return avs;
+                }
                 return lvl_size;
         },
 
+        /**
+         * Gets number of files on specific level
+         * @param lvl
+         * @returns {number}
+         */
         levelTiles: function (lvl)
         {
                 if (!window.config) return 0;
@@ -64,14 +72,13 @@ window.stat =
                 }
                 return num;
         },
-
-
-        logging: function ()
-        {
-                console.log.apply(console, arguments);
-
-        },
-
+        
+        /**
+         * Gets position and returns tile index
+         * @param position
+         * @param curr_lvl
+         * @returns {number} - tile index
+         */
         convertToTile: function (position, curr_lvl)
         {
                 if (!window.config) return 0;
@@ -89,65 +96,17 @@ window.stat =
                 return Math.floor(tile_pos);
         },
 
+        /**
+         * Gets tile index and returns position of starting element
+         * @param lvl - Level
+         * @param index - Index
+         * @returns {number} - position of first element in tile
+         */
         tileToPosition: function (lvl, index)
         {
                 if (!window.config) return 0;
                 var max = window.config.levels;
                 var diff = max - lvl;
                 return (Math.pow(window.config.tile_size, diff)) * index;
-        },
-
-        domainXSize: function ()
-        {
-                var domain = window.icfg.domain;
-                return domain.x[1] - domain.x[0];
-        },
-
-        domainYSize: function ()
-        {
-                var domain = window.icfg.domain;
-                return domain.y[1] - domain.y[0];
-        },
-
-        domainXToTiles: function ()
-        {
-                var tiles = this.domainXSize() / this.levelTileSize();
-                return tiles;
         }
 };
-
-/**
- *  Simple logging tool for application
- * @constructor
- */
-
-function SimpleLogger()
-{
-        this.disabled = {};
-        var _this = this;
-        this.log = window.stat.logging;
-        this.error = function ()
-        {
-                if (this.disabled.error) return;
-                this.log.apply(null, arguments);
-        };
-        this.warn = function ()
-        {
-                if (this.disabled.warn) return;
-                this.log.apply(null, arguments);
-        };
-        this.debug = function ()
-        {
-                if (this.disabled.debug) return;
-                this.log.apply(null, arguments);
-        };
-        this.info = function ()
-        {
-                if (this.disabled.info) return;
-                this.log.apply(null, arguments);
-        };
-        //this.disabled.error = 1;
-        //this.disabled.warning = 1;
-        //this.disabled.info = 1;
-        //this.disabled.debug = 1;
-}
