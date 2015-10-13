@@ -59,17 +59,19 @@ window.stat =
         {
                 if (!window.config) return 0;
                 lvl = lvl || window.icfg.current.level;
+
                 var max = window.config.levels - 1;
+                var num = window.config.size / window.config.tile_size;
                 var diff = max - lvl;
 
                 if (diff < 0) {
                         diff = 0;
                 }
 
-                var num = window.config.size / window.config.tile_size;
                 for (var i = 0; i < diff; i++) {
                         num = Math.ceil(num / window.config.tile_size);
                 }
+
                 return num;
         },
         
@@ -83,16 +85,18 @@ window.stat =
         {
                 if (!window.config) return 0;
                 curr_lvl = curr_lvl || window.icfg.current.level;
+
                 var size = window.config.size;
                 var max = window.config.levels - 1;
                 var diff = max - curr_lvl;
-
                 var num = window.config.size / window.config.tile_size;
+
                 for (var i = 0; i < diff; i++) {
                         num = Math.ceil(num / window.config.tile_size);
                 }
 
                 var tile_pos = position / (size / num);
+
                 return Math.floor(tile_pos);
         },
 
@@ -104,9 +108,12 @@ window.stat =
          */
         tileToPosition: function (lvl, index)
         {
-                if (!window.config) return 0;
+                if (!window.config)
+                        return 0;
+
                 var max = window.config.levels;
                 var diff = max - lvl;
+
                 return (Math.pow(window.config.tile_size, diff)) * index;
         }
 };

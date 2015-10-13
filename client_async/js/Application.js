@@ -22,8 +22,10 @@ function ApplicationManager(host, drawer)
         this.host = host || "ws://localhost:10888";
         this.levels = null;
 
+        // Global Variable containing configuration from server
         window.config = null;
 
+        // self pointer
         var _this = this;
 
         /**
@@ -158,10 +160,11 @@ function ApplicationManager(host, drawer)
         {
                 raw = raw || false;
                 if (level < 0 || level >= this.levels.length) return;
+
                 var lvl = this.levels[level];
                 lvl.raw = raw;
+                //lvl.requestTiles = this.connection.getTile;
                 lvl.addTile(index, data);
-                lvl.requestTiles = this.connection.getTile;
         };
 
         /**

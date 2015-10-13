@@ -115,8 +115,7 @@ function ConnectionManager(host)
          */
         this.getTiles = function (level, beg, end)
         {
-                _this.log.info("[INFO] Calling get tiles @ level [%d] and interval [%d, %d]", level, index.beg,
-                               index.end);
+                _this.log.info("[INFO] Calling get tiles @ level [%d] and interval [%d, %d]", level, beg, end);
                 var message =
                 {
                         type : "get-tiles",

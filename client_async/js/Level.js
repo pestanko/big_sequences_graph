@@ -17,6 +17,8 @@ function WindowLevel(level, manager, raw)
         var requested_tiles = {};
         // Self pointer
         var _this = this;
+        // Previous
+        var prev = {up: -1, low: -1};
 
         // Array of Tiles
         this.tiles = new Array(lvl_size);
@@ -39,7 +41,7 @@ function WindowLevel(level, manager, raw)
 
         /**
          *  Gets window size
-         * @returns Window size
+         * @returns {number} Window size
          */
         this.window_size = function ()
         {
@@ -56,7 +58,7 @@ function WindowLevel(level, manager, raw)
          * Returns Up index of active window (interval that is shown)
          * Also check bounds and return max or min value
          * @param index - UpIndex
-         * @returns UpIndex
+         * @returns {number} UpIndex
          */
         this.upIndex = function (index)
         {
@@ -73,7 +75,7 @@ function WindowLevel(level, manager, raw)
          * Returns Low index of active window (interval that is shown)
          * Also check bounds and return max or min value
          * @param index - Low Index
-         * @returns Low Index
+         * @returns {number} Low Index
          */
         this.lowIndex = function (index)
         {
@@ -88,28 +90,30 @@ function WindowLevel(level, manager, raw)
          * Returns Low buffer index before active window (interval that is preloaded)
          * Also check bounds and return max or min value
          * @param index - Low buffer Index
-         * @returns Low buffer Index
+         * @returns {number} Low buffer Index
          */
         this.lowBuffIndex = function (index)
         {
                 index = this.lowIndex(index);
-                var low_size = Math.floor(this.window_size() * 1);
+                var low_size = Math.floor(this.window_size());
 
-                return index - low_size;
+                var lowB = index - low_size;
+                return (lowB < 0) ? 0 : lowB;
         };
 
         /**
          * Returns Up buffer index behind active window (interval that is preloaded)
          * Also check bounds and return max or min value
          * @param index - Up buffer Index
-         * @returns Up buffer Index
+         * @returns {number} Up buffer Index
          */
         this.upBuffIndex = function (index)
         {
                 index = this.upIndex(index);
-                var up_size = Math.ceil(this.window_size() * 1);
+                var up_size = Math.ceil(this.window_size());
 
-                return index + up_size;
+                var upB = index + up_size;
+                return (upB > lvl_size) ? lvl_size : upB;
         };
 
         /**
@@ -165,8 +169,52 @@ function WindowLevel(level, manager, raw)
                 }
         };
 
+        this.requestTiles = function (beg, end)
+        {
+                if (beg >= end) return;
+                var min = (beg < 0) ? 0 : beg;
+                var max = (end > lvl_size) ? 0 : end;
+                var lbi = prev.low;
+                var ubi = prev.up;
+
+                if (lbi == -1 || ubi == -1) {
+                        this.connection.getTiles(level, min, max);
+                        prev.low = min;
+                        prev.max = max;
+                        return;
+                }
+
+                var min_b = (min < lbi) ? min : lbi;
+                var max_b = (max > ubi) ? max : ubi;
+
+                if (min < lbi && max < lbi) {
+                        this.connection.getTiles(level, min, max);
+                        prev.low = min;
+                        prev.max = max;
+                        return;
+                }
+
+                if (min > ubi) {
+                        this.connection.getTiles(level, min, max);
+                        prev.low = min;
+                        prev.max = max;
+                        return;
+                }
+
+                if (min_b != lbi) {
+                        this.connection.getTiles(level, min_b, lbi + 1);
+                }
+
+                if (max_b != ubi) {
+                        this.connection.getTiles(level, ubi, max_b + 1);
+                }
+
+                prev.low = min;
+                prev.max = max;
+        };
+
         /**
-         * This metod will request all tiles in active window and in buffers
+         * This method will request all tiles in active window and in buffers
          */
         this.loadBuffer = function ()
         {
@@ -175,17 +223,19 @@ function WindowLevel(level, manager, raw)
                 var upB = this.upBuffIndex();
                 var lowB = this.lowBuffIndex();
                 var i;
-                for (i = low; i < up + 1; i++) { // Window interval
-                        this.requestTile(i)
-                }
+                /*for (i = low; i < up + 1; i++) { // Window interval
+                 this.requestTile(i)
+                 }
 
-                for (i = up; i < upB + 1; i++) {
-                        this.requestTile(i)
-                }
+                 for (i = up; i < upB + 1; i++) {
+                 this.requestTile(i)
+                 }
 
-                for (i = lowB; i < low; i++) {
-                        this.requestTile(i)
-                }
+                 for (i = lowB; i < low; i++) {
+                 this.requestTile(i)
+                 }*/
+
+                this.requestTiles(lowB, upB);
         };
 
         /**

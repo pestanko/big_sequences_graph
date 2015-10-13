@@ -1,4 +1,4 @@
-__author__ = 'wermington'
+__author__ = 'Peter Stanko'
 
 import os.path
 import numpy as np
@@ -11,6 +11,13 @@ TILE_SIZE = 10
 
 FORMAT = " <%(asctime)-15s> {%(filename)s:%(lineno)s - %(funcName)s()} [%(levelname)s]: %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
+
+
+class Tile:
+	def __init__(self, index ,min_arr, max_arr):
+		self.min = min_arr
+		self.max = max_arr
+		self.index = index
 
 
 class Level:
@@ -92,7 +99,7 @@ class Holder:
 
 	def add_data(self, level, index, offset, data):
 		if level >= self._levels_num:
-			logger.error("Level too high {0}".format(level))
+			self.logger.error("Level too high {0}".format(level))
 			return
 
 		lvl = self.levels[level]
@@ -105,6 +112,8 @@ class Holder:
 		return self.levels[index]
 
 
+
+
 class Application:
 	def __init__(self, file_path, h5path, matrix_path=None, matrix_file=None):
 		self.file_path = file_path
@@ -112,7 +121,7 @@ class Application:
 		self.matrix_path = matrix_path
 		self.matrix_file = matrix_file
 		self.logger = logging.getLogger(__name__)
-		matrix_data = None
+		self.tile_size = 10;
 
 		self.h5file = h5py.File(self.file_path, "r+")
 		self.data = self.h5file[h5path]
@@ -131,8 +140,20 @@ class Application:
 			for l in maxData.keys():
 				self.maxDataLevels.append(maxData[l])
 
-			pass
+	def get_tile(self, level, index):
+		if level > len(self.minDataLevels):
+			return None
+		lvl_min = self.minDataLevels[level]
+		lvl_max = self.maxDataLevels[level]
+		pos = index * self.tile_size
+		pos_min = pos
+		pos_max = pos + self.tile_size
+		self.logger.info("Requested tile @ [{0}, {1}]: [{2}, {3}] ".format(level, index, pos_min, pos_max))
 
+		min_arr = lvl_min[pos_min:pos_max]
+		max_arr = lvl_max[pos_min:pos_max]
+		self.logger.debug("Min array: {0}  |  Max array: {1}".format(min_arr, max_arr))
+		return Tile(index, min_arr, max_arr)
 
 	def generate_minmax(self):
 		self.logger.info("Generating min max.")
@@ -171,11 +192,7 @@ def main():
 	logger.info("File path: %s", file_path)
 	logger.info("H5 path: %s", h5path)
 
-
-	application = Application(file_path=file_path,
-														h5path=h5path,
-														matrix_path=matrix_path,
-														matrix_file=matrix_file)
+	application = Application(file_path=file_path, h5path=h5path, matrix_path=matrix_path, matrix_file=matrix_file)
 
 
 if __name__ == '__main__':
