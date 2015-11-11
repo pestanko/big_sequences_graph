@@ -11,18 +11,19 @@ logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 def create_minmax(f, h5path):
 	logger = logging.getLogger(__name__)
 
-	logger.info(" Creating min_max")
+	logger.info(" Creating min_max ...")
 
 	base = 10
 	index_set = f[h5path]
+	logger.info("H5 path - {0}".format(h5path))
 
 	shape = index_set.shape
 	dtype = index_set.dtype
 	n_chan = shape[1]
 	n_sample = shape[0]
 
-	logger.info(" >>> Number of channels: %d", n_chan)
-	logger.info(" >>> tNumber of samples: %d", n_sample)
+	logger.debug(" >>> Number of channels: %d", n_chan)
+	logger.debug(" >>> tNumber of samples: %d", n_sample)
 
 	base_log = int(np.log10(n_sample)) - 1
 

@@ -9,7 +9,7 @@
 window.icfg =
 {
         current  : {level: 0},
-        factor   : 10,
+        factor   : 4,
         domain   : {x: [0, 1000], y: [0, 2000]},
         threshold: 20,
         position : {beg: 0, end: 1000000}

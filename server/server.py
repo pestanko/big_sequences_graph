@@ -7,109 +7,42 @@ import math
 import logging
 import minmax
 
+from websocket_server import WebsocketServer
+
+
 TILE_SIZE = 10
 
 FORMAT = " <%(asctime)-15s> {%(filename)s:%(lineno)s - %(funcName)s()} [%(levelname)s]: %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
+ws_log = logging.getLogger("WebSocket")
 
 class Tile:
 	def __init__(self, index ,min_arr, max_arr):
-		self.min = min_arr
-		self.max = max_arr
+		self.min = min_arr # channels
+		self.max = max_arr # channels
 		self.index = index
+		self.logger= logging.getLogger(__name__)
+
+	def build(self):
+		array_chan = []
+
+		self.logger.debug("Number of channels: {0}".format(len(self.min)))
+		for i in range(len(self.min)):
+			min_arr = self.min[i]
+			max_add = self.max[i]
+			minmax = []
+			minmax.append(min_arr)
+			minmax.append(max_add)
+			array_chan.append(minmax)
 
 
-class Level:
-	def __init__(self, n_tiles, index, n_chan):
-		self.logger = logging.getLogger(__name__)
-		self._tiles = [n_tiles]
-		self._index = index
-		self._num_tiles = n_tiles
+		#self.logger.debug("MAX: {0}".format(minmax[0]))
+		#self.logger.debug("MIN: {0}".format(minmax[1]))
 
-		for i in range(0, n_tiles):
-			tile = [n_chan]
-			self.build_tile(tile, n_chan)
-
-	@property
-	def tiles(self):
-		return self._tiles
-
-	@property
-	def index(self):
-		return self._index
-
-	@property
-	def n_tiles(self):
-		return self._num_tiles
-
-	@staticmethod
-	def build_channel():
-		channel = [2]  ## MIN_MAX
-		channel[0] = [TILE_SIZE]  # MIN
-		channel[1] = [TILE_SIZE]  # MAX
-		return channel
-
-	def build_tile(self, tile, n_tiles):
-		for i in range(0, n_tiles):
-			chan = self.build_channel()
-			tile[i] = chan
-
-	def add_data(self, index, offset, data):
-		if index >= self._num_tiles:
-			self.logger.error(" Index too high {0} ".format(index))
-			return
-
-		tile = self.tiles[index]
-
-		if offset > TILE_SIZE:
-			self.logger.error("Offset too high {0} ".format(offset))
-			return
-		tile[offset] = data
+		return array_chan
 
 
-class Holder:
-	def __init__(self, n_levels=5, data_size=1000000, n_chan=1):
-		self._levels = [n_levels]
-		self.logger = logging.getLogger(__name__)
-		self._levels_num = n_levels
-		self.tile_size = TILE_SIZE
-		self._data_size = data_size
-		for i in range(0, n_levels):
-			lvl_size = self.count_level_tiles(i)
-			level = Level(n_tiles=lvl_size, index=i, n_chan=n_chan)
-			self.levels[i] = level
-
-	@property
-	def levels(self):
-		return self._levels
-
-	@property
-	def num_levels(self):
-		return self._levels_num
-
-	def count_level_tiles(self, index):
-		max_offset = self._levels_num - 1
-		diff = max_offset - index
-
-		num = self._data_size / self.tile_size  ## First Step
-		for i in range(0, diff):
-			num = math.ceil(num / self.tile_size)  ## Iterative
-		return num
-
-	def add_data(self, level, index, offset, data):
-		if level >= self._levels_num:
-			self.logger.error("Level too high {0}".format(level))
-			return
-
-		lvl = self.levels[level]
-		lvl.add_data(index, offset, data)
-
-	def get_tile(self, level, index):
-		if level >= self._levels_num:
-			self.logger.error("Level too high {0}".format(level))
-			return None
-		return self.levels[index]
 
 
 
@@ -121,31 +54,51 @@ class Application:
 		self.matrix_path = matrix_path
 		self.matrix_file = matrix_file
 		self.logger = logging.getLogger(__name__)
-		self.tile_size = 10;
+		self.tile_size = 10
 
 		self.h5file = h5py.File(self.file_path, "r+")
 		self.data = self.h5file[h5path]
+		self.logger.debug("Data: {0}".format(self.data))
 
 		if 'minmax' not in self.h5file:
+			self.logger.info("Creating min max.")
 			self.generate_minmax()
 
 		if 'minmax' in self.h5file:
+			self.logger.info("Min max found in file")
 			minmax = self.h5file['minmax']
+			self.logger.debug("MinMax: {0}".format(minmax))
 			maxData = minmax['h_max']
 			minData = minmax['h_min']
+			self.logger.debug("MaxData: {0}".format(maxData))
+			self.logger.debug("MinData: {0}".format(minData))
+
 			self.maxDataLevels = [self.data]
 			self.minDataLevels = [self.data]
+
+
+
 			for l in minData.keys():
 				self.minDataLevels.append(minData[l])
 			for l in maxData.keys():
 				self.maxDataLevels.append(maxData[l])
 
+			self.logger.debug("MaxDataLevels: {0}".format(self.maxDataLevels))
+			self.logger.debug("MinDataLevels: {0}".format(self.minDataLevels))
+
 	def get_tile(self, level, index):
-		if level > len(self.minDataLevels):
+		levels_count = len(self.minDataLevels)
+
+		if level > levels_count:
 			return None
+
 		lvl_min = self.minDataLevels[level]
 		lvl_max = self.maxDataLevels[level]
+		self.logger.debug("Lvl MIN: {0}".format(lvl_min))
+		self.logger.debug("Lvl MAX: {0}".format(lvl_max))
+
 		pos = index * self.tile_size
+
 		pos_min = pos
 		pos_max = pos + self.tile_size
 		self.logger.info("Requested tile @ [{0}, {1}]: [{2}, {3}] ".format(level, index, pos_min, pos_max))
@@ -153,11 +106,37 @@ class Application:
 		min_arr = lvl_min[pos_min:pos_max]
 		max_arr = lvl_max[pos_min:pos_max]
 		self.logger.debug("Min array: {0}  |  Max array: {1}".format(min_arr, max_arr))
+
 		return Tile(index, min_arr, max_arr)
 
 	def generate_minmax(self):
 		self.logger.info("Generating min max.")
 		minmax.create_minmax(self.h5file, self.h5path)
+
+
+
+
+def new_client(client, server):
+	ws_log.debug("New client connected and was given id %d" % client['id'])
+
+
+# Called for every client disconnecting
+def client_left(client, server):
+	ws_log.debug("Client(%d) disconnected" % client['id'])
+
+
+# Called when a client sends a message
+def message_received(client, server, message):
+	ws_log.debug("Received message: {0}".format( message))
+
+
+
+def start_server(port):
+	server = WebsocketServer(port)
+	server.set_fn_new_client(new_client)
+	server.set_fn_client_left(client_left)
+	server.set_fn_message_received(message_received)
+	server.run_forever()
 
 
 def main():
@@ -176,7 +155,10 @@ def main():
 	matrix_path = None
 	matrix_file = None
 	file_path = os.path.abspath("./testing_data.h5")
+
+
 	h5path = '/eeg_raw/raw'
+
 	args = vars(args_namespace)
 
 	if args["file"] is not None:
@@ -192,8 +174,16 @@ def main():
 	logger.info("File path: %s", file_path)
 	logger.info("H5 path: %s", h5path)
 
+	logger.debug("Starting application");
 	application = Application(file_path=file_path, h5path=h5path, matrix_path=matrix_path, matrix_file=matrix_file)
+	tile = application.get_tile(1,0)
 
+	counter = 0
+	for chan in tile.build():
+		print("Channel {0}: min {1}".format(counter, chan[0]))
+		print("Channel {0}: max {1}".format(counter, chan[1]))
+
+		counter += 1
 
 if __name__ == '__main__':
 	main()

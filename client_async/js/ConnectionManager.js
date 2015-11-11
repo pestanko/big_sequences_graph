@@ -82,7 +82,7 @@ function ConnectionManager(host)
                         levels            : message.levels,
                         tile_size         : message.tile_size,
                         size              : message.size,
-                        active_window_size: 5,
+                        active_window_size: 50,
                         channels          : message.channels
                 };
 
@@ -115,7 +115,8 @@ function ConnectionManager(host)
          */
         this.getTiles = function (level, beg, end)
         {
-                _this.log.info("[INFO] Calling get tiles @ level [%d] and interval [%d, %d]", level, beg, end);
+                this.log.info("[INFO] Calling get tiles @ level [%d] and interval [%d, %d]",
+                              level, beg, end);
                 var message =
                 {
                         type : "get-tiles",

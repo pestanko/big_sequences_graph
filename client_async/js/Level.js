@@ -218,22 +218,8 @@ function WindowLevel(level, manager, raw)
          */
         this.loadBuffer = function ()
         {
-                var low = this.lowIndex();
-                var up = this.upIndex();
                 var upB = this.upBuffIndex();
                 var lowB = this.lowBuffIndex();
-                var i;
-                /*for (i = low; i < up + 1; i++) { // Window interval
-                 this.requestTile(i)
-                 }
-
-                 for (i = up; i < upB + 1; i++) {
-                 this.requestTile(i)
-                 }
-
-                 for (i = lowB; i < low; i++) {
-                 this.requestTile(i)
-                 }*/
 
                 this.requestTiles(lowB, upB);
         };

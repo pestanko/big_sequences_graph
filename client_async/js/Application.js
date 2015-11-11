@@ -163,7 +163,6 @@ function ApplicationManager(host, drawer)
 
                 var lvl = this.levels[level];
                 lvl.raw = raw;
-                //lvl.requestTiles = this.connection.getTile;
                 lvl.addTile(index, data);
         };
 
@@ -367,8 +366,9 @@ function ApplicationManager(host, drawer)
          */
         this.scaleX = function (dir)
         {
-                this.currLvl().scale(dir / 25);
-                this.drawer.updateAxes();
+                var scale_val = dir / 20;
+                this.drawer.scaleX(scale_val);
+                this.currLvl().scale(scale_val);
         };
 
         /**
