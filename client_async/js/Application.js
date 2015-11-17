@@ -28,6 +28,11 @@ function ApplicationManager(host, drawer)
         // self pointer
         var _this = this;
 
+        this.connect = function()
+        {
+                this.connection = new ConnectionManager(host);
+        };
+
         /**
          * Gets current level
          * @returns {WindowLevel}
