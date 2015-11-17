@@ -6,7 +6,7 @@ var big_graph = SAGE2_App.extend(
                     this.SAGE2Init("div", data);
                     this.element.id = "container";
 
-                    this.resizeEvents = "continuous";//see below for other options
+                    this.resizeEvents = "continuous"; //see below for other options
 
                     // initialize your variables
                     this.container_name = "container";
@@ -53,6 +53,7 @@ var big_graph = SAGE2_App.extend(
             {
                     var resize = new Event("resize");
                     this.element.dispatchEvent(resize);
+                    this.manager.reload();
                     this.refresh(date); //redraw after resize
             },
 
