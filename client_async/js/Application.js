@@ -104,7 +104,10 @@ function ApplicationManager(host, drawer)
                 var wc = window.config;
                 width = width | wc.client_width();
                 var t_size = wc.tile_size;
-                var tiles = Math.floor(width / (window.icfg.factor * t_size));
+                var factor = (window.icfg.factor);
+                // Kolko pixelov na jednu tile
+                var tiles = Math.floor(width / (factor * t_size));
+                this.log.info("Tiles vs Data vs Width : [%d, %d ,%d]", tiles, factor * t_size, width);
                 _this.log.debug("[DEBUG] Tiles in window: ", tiles);
                 wc.active_window_size = tiles;
         };

@@ -144,6 +144,7 @@
             var val_node = d3.select("#factor_val").node();
             var cfg = window.icfg;
             cfg.factor = val_node.value;
+            manager.calculateWindowSize();
             _this.moveByPos(0);
             drawer.reload();
         });
