@@ -128,7 +128,6 @@ function D3Drawer(main_container_name)
 
                 this.log.info("[INFO] Window size: [%d, %d]", getWidth(), getHeight());
 
-
                 if (cont) {
                         var s = cont.select("svg");
                         if (s) s.remove();
@@ -158,14 +157,14 @@ function D3Drawer(main_container_name)
 
                 container.append("g")
                     .attr("class", "x axis")
-                        // .attr("style", STYLE_AXIS)
+                    // .attr("style", STYLE_AXIS)
                     .attr("transform", "translate(0," + height + ")")
                     .call(xAxis);
 
                 container.append("g")
                     .attr("class", "y axis")
                     .call(yAxis)
-                        // .attr("style", STYLE_AXIS)
+                    // .attr("style", STYLE_AXIS)
                     .append("text")
                     .attr("transform", "rotate(-90)")
                     .attr("y", 6)
@@ -306,40 +305,66 @@ function D3Drawer(main_container_name)
         this.drawMinMax = function (data, chan)
         {
 
-                const cls = "line";
+                /*
 
-                path_container.append("path")
-                    .datum(data)
-                    .attr("class", cls)
-                    .attr("style", STYLE_LINE)
-                    .attr("id", "chan" + chan)
-                    .attr("d", min_line);
+                 const cls = "line";
 
-                path_container.append("path")
-                    .datum(data)
-                    .attr("class", cls)
-                    .attr("style", STYLE_LINE)
-                    .attr("id", "chan" + chan)
-                    .attr("d", min_line);
+                 path_container.append("path")
+                 .datum(data)
+                 .attr("class", cls)
+                 .attr("style", STYLE_LINE)
+                 .attr("id", "chan" + chan)
+                 .attr("d", min_line);
 
-                path_container.append("path")
-                    .datum(data)
-                    .attr("class", cls)
-                    .attr("style", STYLE_LINE)
-                    .attr("id", "chan" + chan)
-                    .attr("d", max_line);
+                 path_container.append("path")
+                 .datum(data)
+                 .attr("class", cls)
+                 .attr("style", STYLE_LINE)
+                 .attr("id", "chan" + chan)
+                 .attr("d", min_line);
 
-                var area_mm = d3.svg.area()
-                    .x(max_line.x())
-                    .y0(min_line.y())
-                    .y1(max_line.y());
+                 path_container.append("path")
+                 .datum(data)
+                 .attr("class", cls)
+                 .attr("style", STYLE_LINE)
+                 .attr("id", "chan" + chan)
+                 .attr("d", max_line);
 
-                path_container.append("path")
-                    .datum(data)
-                    .attr("class", "area" + chan)
-                    .attr("d", area_mm)
-                    .attr("fill", "steelblue")
-                    .style("opacity", "0.3");
+                 var area_mm = d3.svg.area()
+                 .x(max_line.x())
+                 .y0(min_line.y())
+                 .y1(max_line.y());
+
+                 path_container.append("path")
+                 .datum(data)
+                 .attr("class", "area" + chan)
+                 .attr("d", area_mm)
+                 .attr("fill", "steelblue")
+                 .style("opacity", "0.3"); */
+
+                /*
+                 * var circle = svgContainer.append("line")
+                 8                         .attr("x1", 5)
+                 9                         .attr("y1", 5)
+                 10                         .attr("x2", 50)
+                 11                         .attr("y2", 50);*/
+
+                for (var i = 0; i < data.length; i++) {
+                        var m = data[i];
+                        var m_x = m.x;
+                        var m_n = m.min;
+                        var m_m = m.max;
+                        path_container.append("line")
+                            .attr("x1", m_x)
+                            .attr("y1", m_n)
+                            .attr("x2", m_x)
+                            .attr("y2", m_m)
+                            .attr("style", STYLE_LINE);
+
+                        console.log("Coords:  [%d, %d] x [%d, %d]", m_x, m_n, m_x, m_m);
+
+                }
+
         };
 
         this.scaleY = function (dir)
