@@ -6,6 +6,7 @@ var big_graph = SAGE2_App.extend(
                     this.SAGE2Init("div", data);
                     this.element.id = "container";
 
+
                     this.resizeEvents = "continuous"; //see below for other options
 
                     // initialize your variables
@@ -85,13 +86,13 @@ var big_graph = SAGE2_App.extend(
                                             this.manager.moveTile(-1);
                                             break;
                                     case "Forward":
-                                            this.manager.moveTile(-1);
+                                            this.manager.moveTile(+1);
                                             break;
                                     case "Left":
-                                            this.manager.movePos(-1);
+                                            this.manager.movePos(-2);
                                             break;
                                     case "Right":
-                                            this.manager.movePos(1);
+                                            this.manager.movePos(2);
                                             break;
                                     case "Up":
                                             this.manager.moveLevel(+1);
@@ -100,10 +101,14 @@ var big_graph = SAGE2_App.extend(
                                             this.manager.moveLevel(-1);
                                             break;
                                     case "ZoomIn":
-                                            this.manager.scaleX(2);
+                                            this.manager.scaleX(-500);
+                                        this.manager.draw();
+
                                             break;
                                     case "ZoomOut":
-                                            this.manager.scaleY(2);
+                                            this.manager.scaleX(500);
+                                            this.manager.draw();
+
                                             break;
                                     case "Reload":
                                             this.manager.reload();

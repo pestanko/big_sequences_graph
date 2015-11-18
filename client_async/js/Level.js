@@ -345,10 +345,10 @@ function WindowLevel(level, manager, raw)
                 var end = this.pos.end;
 
                 if (up_down > 0) {
-                        end = beg + this.max_size - 15;
+                        end = beg + this.max_size - 50;
                 }
                 else {
-                        end = beg + this.max_size + 15;
+                        end = beg + this.max_size + 50;
                 }
 
                 var diff_e = end - this.pos.end;

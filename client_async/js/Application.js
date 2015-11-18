@@ -376,7 +376,10 @@ function ApplicationManager(host, drawer)
         {
                 var scale_val = dir / 20;
                 this.drawer.scaleX(scale_val);
+                this.drawer.drawLevel();
                 this.currLvl().scale(scale_val);
+
+
         };
 
         /**
