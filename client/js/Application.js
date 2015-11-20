@@ -323,7 +323,7 @@ function ApplicationManager(host, drawer)
         };
 
         /**
-         * Move to position
+         * Move to position with drawing
          * @param dir
          */
         this.movePos = function (dir)
@@ -332,6 +332,10 @@ function ApplicationManager(host, drawer)
                 this.draw();
         };
 
+        /**
+         * Move to position with drawing
+         * @param dir
+         */
         this.movePosNoDraw = function (dir)
         {
                 this.currLvl().moveVariable(dir, dir);
