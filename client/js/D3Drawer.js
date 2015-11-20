@@ -128,7 +128,6 @@ function D3Drawer(main_container_name)
 
                 this.log.info("[INFO] Window size: [%d, %d]", getWidth(), getHeight());
 
-
                 if (cont) {
                         var s = cont.select("svg");
                         if (s) s.remove();
@@ -158,14 +157,14 @@ function D3Drawer(main_container_name)
 
                 container.append("g")
                     .attr("class", "x axis")
-                        // .attr("style", STYLE_AXIS)
+                    // .attr("style", STYLE_AXIS)
                     .attr("transform", "translate(0," + height + ")")
                     .call(xAxis);
 
                 container.append("g")
                     .attr("class", "y axis")
                     .call(yAxis)
-                        // .attr("style", STYLE_AXIS)
+                    // .attr("style", STYLE_AXIS)
                     .append("text")
                     .attr("transform", "rotate(-90)")
                     .attr("y", 6)
@@ -191,7 +190,6 @@ function D3Drawer(main_container_name)
                 if (this.drawTiles) {
                         this.refreshLevel(level);
                 }
-
         };
 
         /**

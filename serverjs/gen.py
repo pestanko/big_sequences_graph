@@ -46,7 +46,7 @@ def main():
     if(random.randint(0,1000) % 100  == 0):
       tmp *= 3
     sin_line = (_range_max + 600) + tmp
-    number = sin_line + (random.randint(5, 20) * math.sin(i)) + 500
+    number = sin_line + (random.randint(5, 20) * math.sin(i)) + 750
     fout.write(str(number) + " ")
   fout.write("\n")
 

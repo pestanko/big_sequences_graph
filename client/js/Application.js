@@ -14,7 +14,6 @@
 
 function ApplicationManager(host, drawer)
 {
-
         this.connection = new ConnectionManager(host);
         this.current = window.icfg.current;
         this.log = Logger;
@@ -25,10 +24,15 @@ function ApplicationManager(host, drawer)
         // Global Variable containing configuration from server
         window.config = null;
 
+        this.connection.receivedTile = add_tile_intern;
+
         // self pointer
         var _this = this;
 
-        this.connect = function()
+        /**
+         * Reconnects to WS Server
+         */
+        this.connect = function ()
         {
                 this.connection = new ConnectionManager(host);
         };
@@ -110,7 +114,7 @@ function ApplicationManager(host, drawer)
                 width = width | wc.client_width();
                 var t_size = wc.tile_size;
                 var factor = (window.icfg.factor);
-                // Kolko pixelov na jednu tile
+                // How many pixels on one tile
                 var tiles = Math.floor(width / (factor * t_size));
                 this.log.info("Tiles vs Data vs Width : [%d, %d ,%d]", tiles, factor * t_size, width);
                 _this.log.debug("[DEBUG] Tiles in window: ", tiles);
@@ -183,7 +187,6 @@ function ApplicationManager(host, drawer)
                 _this.addTile(message.level, message.index, message.data, message.raw);
         }
 
-        this.connection.receivedTile = add_tile_intern;
 
         /**
          * When arrives multiple tiles.
@@ -329,6 +332,11 @@ function ApplicationManager(host, drawer)
                 this.draw();
         };
 
+        this.movePosNoDraw = function (dir)
+        {
+                this.currLvl().moveVariable(dir, dir);
+        };
+
         /**
          * Helper function - move with cleaning leves
          * @param dir - direction to move
@@ -378,8 +386,6 @@ function ApplicationManager(host, drawer)
                 this.drawer.scaleX(scale_val);
                 this.drawer.drawLevel();
                 this.currLvl().scale(scale_val);
-
-
         };
 
         /**

@@ -255,14 +255,14 @@
                 prev_mouseY = e.clientY;
                 prev_mouseX = e.clientX;
                 drawer.scaleY(diff_y / 2);
-                manager.movePos(diff_x / 10);
+                manager.movePosNoDraw(diff_x / 10);
+                drawer.redrawLevel();
             }
         };
 
         $('#grabber').mousewheel(function (event)
                                  {
                                      if (!window.config) return;
-                                     //console.log(event.deltaX, event.deltaY, event.deltaFactor);
                                      manager.scaleX(-event.deltaY * event.deltaFactor);
                                      if (drawer.deltaX) {
                                          drawer.scaleY(event.deltaX * event.deltaFactor);
