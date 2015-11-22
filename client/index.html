@@ -48,10 +48,24 @@
         }
 
         ul li {
+            margin: 0px 10px;
             list-style: none;
+        }
+        li.inline{
             display: inline-block;
+            width:auto;
         }
 
+        ul {
+            margin: 10px;
+            padding: 5px;
+            border: 1px solid #555;
+            width:auto;
+            border-radius: 5px;
+            box-shadow: 5px 5px 2.5px #AAA;
+            text-align: center;
+        }
+        
 
     </style>
 
@@ -61,40 +75,15 @@
 <body>
 <div id="container">
     <div id="elems_menu">
-        <ul>
-            <li>
+        <ul >
+            <li class="inline" style="float:left;"> <button id="refresh"> Refresh </button></li>
+            <li class="inline" >
                 <input type="text" value="ws://localhost:10888/" id="ws_host"/>
                 <button id="ws_connect">Connect!</button>
             </li>
-        </ul>
-        <ul>
-            <li>
+            <li style="float:right;" class="inline">
                 <input type="text" value="" id="factor_val"/>
                 <button id="factor_set">Factor!</button>
-            </li>
-        </ul>
-        <ul>
-            <li>
-                <button id="moveLeft">&lt;&lt;</button>
-                <button id="moveRight">&gt;&gt;</button>
-            </li>
-
-            <li>
-                <button id="moveLeftPos">&lt;</button>
-                <button id="moveRightPos">&gt;</button>
-            </li>
-        </ul>
-        <ul>
-            <li>
-                Scale:
-                <button id="scaleUp">+</button>
-                <button id="scaleDown">-</button>
-            </li>
-            <li>
-                <button id="moveUp">UP</button>
-            </li>
-            <li>
-                <button id="moveDown">DOWN</button>
             </li>
         </ul>
 
@@ -104,7 +93,27 @@
         <div id="graph_container" style="width: 95%; height: 600px;">
         </div>
     </div>
+    <div id="controls">
+        <ul>
+            <li class="inline">
+                <button id="moveLeft">&lt;&lt;</button>
+                <button id="moveRight">&gt;&gt;</button>
+            </li>
 
+            <li class="inline">
+                <button id="moveLeftPos">&lt;</button>
+                <button id="moveRightPos">&gt;</button>
+            </li>
+            <li class="inline">
+                <button id="yUp">Y-UP</button>
+                <button id="yDown">Y-DOWN</button>
+            </li>
+            <li class="inline">
+                <button id="moveUp">UP</button>
+                <button id="moveDown">DOWN</button>
+            </li>
+        </ul>
+    </div>
 </div>
 
 
