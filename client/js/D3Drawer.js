@@ -265,7 +265,7 @@ function D3Drawer(main_container_name)
                 }
                 var group = this.group;
                 var ll = level.lowIndex()  - 5;
-                var lu = level.upIndex() + 5 ;
+                var lu = level.upIndex() + 5;
                 var start = ll;
                 var stop = lu;
 
