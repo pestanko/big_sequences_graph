@@ -5,11 +5,13 @@
         Graph big number files
     </title>
 
-    <link ref="stylesheet" href="css/layout.css"/>
+    <link rel="stylesheet" href="css/layout.css"/>
     <script type="text/javascript" src="js/bower_components/js-logger/src/logger.min.js">
     </script>
     <script type="text/javascript" src="js/bower_components/jquery/dist/jquery.min.js">
     </script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script type="text/javascript" src="js/jquery.mousewheel.min.js"></script>
     <script src="js/d3.min.js"></script>
     <script src="js/Helpers.js"></script>
@@ -48,24 +50,35 @@
         }
 
         ul li {
-            margin: 0px 10px;
+            margin: 0 10px;
             list-style: none;
         }
-        li.inline{
+
+        li.inline {
             display: inline-block;
-            width:auto;
+            width: auto;
         }
 
-        ul {
+        ul{
             margin: 10px;
             padding: 5px;
-            border: 1px solid #555;
-            width:auto;
-            border-radius: 5px;
-            box-shadow: 5px 5px 2.5px #AAA;
             text-align: center;
         }
-        
+        .nice{
+            border: 1px solid #555;
+            border-radius: 5px;
+            box-shadow: 5px 5px 2px #AAA;
+        }
+
+        #msg_holder
+        {
+            height: 50px;
+        }
+
+        div.hidden{
+            display: none;
+        }
+
 
     </style>
 
@@ -75,26 +88,32 @@
 <body>
 <div id="container">
     <div id="elems_menu">
-        <ul >
-            <li class="inline" style="float:left;"> <button id="refresh"> Refresh </button></li>
-            <li class="inline" >
-                <input type="text" value="ws://localhost:10888/" id="ws_host"/>
+        <ul class="nice">
+            <li class="inline" style="float:left;">
+                <button id="refresh"> Refresh</button>
+            </li>
+            <li class="inline" style="float:left;">
+                <button id="DialogChan"> Channels</button>
+            </li>
+            <li class="inline"> Status: <label id="conn_status">Disconnected</label> </li>
+            <li class="inline">
+                <input type="text" value="ws://aisa.fi.muni.cz:10888/" id="ws_host"/>
                 <button id="ws_connect">Connect!</button>
             </li>
             <li style="float:right;" class="inline">
                 <input type="text" value="" id="factor_val"/>
-                <button id="factor_set">Factor!</button>
+                <button id="factor_set">Factor</button>
+            </li>
+            <li style="float:right;" class="inline">
+                <label>Lvl:</label> <input type="text" value="" id="i_level"/>
+                <label>Tile:</label> <input type="text" value="" id="i_tile"/>
+                <button id="pos_set">Move</button>
             </li>
         </ul>
 
     </div>
-
-    <div id="grabber" style="width: 99%;height: 650px; border: 1px solid black">
-        <div id="graph_container" style="width: 95%; height: 600px;">
-        </div>
-    </div>
     <div id="controls">
-        <ul>
+        <ul class="nice">
             <li class="inline">
                 <button id="moveLeft">&lt;&lt;</button>
                 <button id="moveRight">&gt;&gt;</button>
@@ -114,12 +133,34 @@
             </li>
         </ul>
     </div>
+
+    <div id="grabber" class="nice" style="width: 99%;height: 700px;">
+        <div id="graph_container" style="width: 99%; height: 95%;">
+        </div>
+    </div>
+
+    <div id="hid_cont" class="hidden">
+        <div id="chan_opt" title="Select channels">
+            <p> Enabled channels:  </p>
+            <ul id="chan_cont">
+
+            </ul>
+        </div>
+    </div>
+
+    <div id="Messages">
+        <ul id="msg_holder">
+
+        </ul>
+    </div>
+
 </div>
 
 
 <script>
     Logger.useDefaults();
     Logger.info("Logger Ready ....");
+
 
     var main = function ()
     {
@@ -129,11 +170,12 @@
         var drawer = new D3Drawer(graph_container);
         var host = "ws://localhost:10888/";
         var manager = null;
-        var stop = true;
         var _this = this;
         this.selected = null;
         var val_node = d3.select("#factor_val").node();
         val_node.value = window.icfg.factor;
+
+
 
         function change_width(num)
         {
@@ -147,6 +189,56 @@
             drawer.reload();
 
         }
+
+        d3.select("#DialogChan").on("click", function(){
+            if(!manager) return;
+
+            var n_chan = window.config.channels;
+
+            for(var i =0 ; i < n_chan; i++)
+            {
+                var ret = drawer.disabledChans[i];
+                var val = (ret) ? 0 : 1;
+                // create the necessary elements
+                var label= document.createElement("li");
+                var description = document.createTextNode("Channel " + i);
+                var checkbox = document.createElement("input");
+
+                checkbox.type = "checkbox";    // make the element a checkbox
+                checkbox.name = "chan_ch_"+i;      // give it a name we can check on the server side
+                checkbox.checked = val;         // make its value "pair"
+                checkbox.value= ""+i;
+                checkbox.id="ch_ch_"+i;
+                label.appendChild(checkbox);   // add the box to the element
+                label.appendChild(description);// add the description to the element
+
+                checkbox.onclick = function(event)
+                {
+
+                    var ch = event.target;
+                    console.log(ch);
+                    if(ch.checked)
+                    {
+                        drawer.chanStat(ch.value, 1);
+                    }else
+                    {
+                        drawer.chanStat(ch.value, 0);
+                    }
+                    drawer.redrawLevel();
+                };
+
+                // add the label element to your div
+                document.getElementById('chan_cont').appendChild(label);
+            }
+
+
+            var chan = $("#chan_opt");
+
+            chan.dialog();
+
+        });
+
+
 
         d3.select("#factor_set").on("click", function ()
         {
@@ -204,15 +296,17 @@
             _this.stepLvl(-1);
         });
 
-        d3.select("#scaleUp").on("click", function ()
+        d3.select("#yUp").on("click", function ()
         {
             if (!manager) return;
-            manager.scaleX(1000);
+            drawer.moveY(100);
+            drawer.redrawLevel();
         });
-        d3.select("#scaleDown").on("click", function ()
+        d3.select("#yDown").on("click", function ()
         {
             if (!manager) return;
-            manager.scaleX(-1000);
+            drawer.moveY(-100);
+            drawer.redrawLevel();
         });
 
         d3.select("#ws_connect").on("click", function ()
@@ -270,14 +364,14 @@
         };
 
         $('#grabber').mousewheel(function (event)
-                                 {
-                                     if (!window.config) return;
-                                     manager.scaleX(-event.deltaY * event.deltaFactor);
-                                     if (drawer.deltaX) {
-                                         drawer.scaleY(event.deltaX * event.deltaFactor);
-                                     }
-                                     drawer.drawLevel();
-                                 });
+        {
+            if (!window.config) return;
+            manager.scaleX(-event.deltaY * event.deltaFactor);
+            if (drawer.deltaX) {
+                drawer.scaleY(event.deltaX * event.deltaFactor);
+            }
+            drawer.drawLevel();
+        });
 
         var grb_d3 = d3.select("#grabber");
         var grabber = grb_d3.node();
@@ -408,6 +502,7 @@
         });
 
     };
+
 
     main();
 
