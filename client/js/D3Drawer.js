@@ -237,26 +237,6 @@ function D3Drawer(main_container_name)
                 var interval = setInterval(reqTilesWait, 100);
         };
 
-        /**
-         * Function to draw space between interval
-         * @param first - first interval
-         * @param second - second interval
-         * @returns {*}
-         */
-        this.taker = function (first, second)
-        {
-                if (first == null || second == null) return null;
-
-                var size = first[0].length;
-                var last_elem = new Array(first.length); // Ready for channels
-                for (var i = 0; i < first.length; i++) {
-                        last_elem[i] = new Array(2);
-                        last_elem[i][0] = first[i][size - 1];
-                        last_elem[i][1] = second[i][0];
-                }
-
-                return last_elem;
-        };
 
         this.buildIntern = function(group, start, stop)
         {
@@ -284,8 +264,8 @@ function D3Drawer(main_container_name)
                         };
                 }
                 var group = this.group;
-                var ll = level.lowIndex() ;
-                var lu = level.upIndex() ;
+                var ll = level.lowIndex()  - 5;
+                var lu = level.upIndex() + 5 ;
                 var start = ll;
                 var stop = lu;
 
@@ -300,8 +280,6 @@ function D3Drawer(main_container_name)
                         return group;
 
                 }
-
-
                 /* Add to begin*/
                 this.buildIntern(group, ll, group.begin);
 

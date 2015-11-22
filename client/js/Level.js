@@ -264,6 +264,10 @@ function WindowLevel(level, manager, raw)
         {
                 var oneStep = this.tileSize / window.config.tile_size;
 
+                var diff = this.pos.end - this.pos.beg;
+
+                oneStep *= (diff / (this.tileSize * 50) );
+
                 dir_beg *= (oneStep / 2);
                 dir_end *= (oneStep / 2);
                 this.movePos(dir_beg, dir_end);
