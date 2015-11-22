@@ -314,6 +314,7 @@
             host = document.getElementById("ws_host").value;
             window.icfg.current.level = 0;
             manager = new ApplicationManager(host, drawer);
+            $("#conn_status").value = "Connected";
         });
 
         var main_node = d3.select(graph_container).node();
