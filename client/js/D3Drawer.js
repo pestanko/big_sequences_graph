@@ -13,8 +13,8 @@ function D3Drawer(main_container_name)
         this.currentLevel = null;
 
         var margin = {top: 20, right: 20, bottom: 50, left: 50},
-                width = getWidth() - margin.left - margin.right,
-                height = getHeight() - margin.top - margin.bottom;
+            width = getWidth() - margin.left - margin.right,
+            height = getHeight() - margin.top - margin.bottom;
 
         this.x = null;
         this.y = null;
@@ -38,46 +38,51 @@ function D3Drawer(main_container_name)
         this.pos = window.icfg.position;
         this.disabledChans = [];
 
+        this.group = {
+                level : null,
+                begin: -1,
+                end  : -1,
+                data : []
+        };
+
         const STYLE_AXIS = " fill: none;stroke: #000";
         const STYLE_LINE = STYLE_AXIS + "shape-rendering: crispEdges;stroke: steelblue;stroke-width: 1.5px;";
 
         // Init
         var min_line = d3.svg.line()
-                .x(function (d)
-                {
-                        return _this.x(d.x);
-                })
-                .y(function (d)
-                {
-                        return _this.y(d.min);
-                });
+            .x(function (d)
+               {
+                       return _this.x(d.x);
+               })
+            .y(function (d)
+               {
+                       return _this.y(d.min);
+               });
 
         var max_line = d3.svg.line()
-                .x(function (d)
-                {
-                        return _this.x(d.x);
-                })
-                .y(function (d)
-                {
-                        return _this.y(d.max);
-                });
+            .x(function (d)
+               {
+                       return _this.x(d.x);
+               })
+            .y(function (d)
+               {
+                       return _this.y(d.max);
+               });
 
         var line = d3.svg.line()
-                .x(function (d)
-                {
-                        return _this.x(d.x);
-                })
-                .y(function (d)
-                {
-                        return _this.y(d.y);
-                });
+            .x(function (d)
+               {
+                       return _this.x(d.x);
+               })
+            .y(function (d)
+               {
+                       return _this.y(d.y);
+               });
 
-        this.chanStat = function(index, state)
+        this.chanStat = function (index, state)
         {
-               this.disabledChans[index] = !state;
+                this.disabledChans[index] = !state;
         };
-
-
 
         /**
          * Gets client width
@@ -142,43 +147,43 @@ function D3Drawer(main_container_name)
                 }
 
                 this.x = d3.scale.linear()
-                        .range([0, width]);
+                    .range([0, width]);
 
                 this.y = d3.scale.linear()
-                        .range([height, 0]);
+                    .range([height, 0]);
 
                 xAxis = d3.svg.axis()
-                        .scale(this.x)
-                        .orient("bottom");
+                    .scale(this.x)
+                    .orient("bottom");
 
                 yAxis = d3.svg.axis()
-                        .scale(this.y)
-                        .orient("left");
+                    .scale(this.y)
+                    .orient("left");
 
                 svg = main_container.append("svg")
-                        .attr("width", width + margin.left + margin.right)
-                        .attr("height", height + margin.top + margin.bottom)
-                        .append("g")
-                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
                 container = svg.append("g").attr("class", "container");
 
                 container.append("g")
-                        .attr("class", "x axis")
-                        // .attr("style", STYLE_AXIS)
-                        .attr("transform", "translate(0," + height + ")")
-                        .call(xAxis);
+                    .attr("class", "x axis")
+                    // .attr("style", STYLE_AXIS)
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis);
 
                 container.append("g")
-                        .attr("class", "y axis")
-                        .call(yAxis)
-                        // .attr("style", STYLE_AXIS)
-                        .append("text")
-                        .attr("transform", "rotate(-90)")
-                        .attr("y", 6)
-                        .attr("dy", ".72em")
-                        .style("text-anchor", "end")
-                        .text("Data -- #");
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    // .attr("style", STYLE_AXIS)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", ".72em")
+                    .style("text-anchor", "end")
+                    .text("Data -- #");
 
                 this.drawLevel();
         };
@@ -253,6 +258,64 @@ function D3Drawer(main_container_name)
                 return last_elem;
         };
 
+        this.buildIntern = function(group, start, stop)
+        {
+                var level = group.level;
+                for (var i = start; i < stop; i++) {
+
+                        var tile = level.tiles[i];
+                        if (!tile) continue;
+
+                        for (var t = 0, j = 0; t < tile.length; t++) {
+                                group.data[j] = group.data[j].concat(tile[t]);
+                                j++;
+                        }
+                }
+        };
+
+        this.buildGroup = function (level)
+        {
+                if(this.group.level != level){
+                        this.group = {
+                                level: level,
+                                begin: -1,
+                                end: -1,
+                                data: []
+                        };
+                }
+                var group = this.group;
+                var ll = level.lowIndex() ;
+                var lu = level.upIndex() ;
+                var start = ll;
+                var stop = lu;
+
+
+                if (group.begin < 0 || group.end < 0) {
+                        group.data = [];
+                        for (var i = 0; i < window.config.channels; i++) {
+                                group.data.push([]);
+                        }
+
+                        this.buildIntern(group, ll, lu);
+                        return group;
+
+                }
+
+
+                /* Add to begin*/
+                this.buildIntern(group, ll, group.begin);
+
+
+                /* Add to end*/
+
+                this.buildIntern(group, group.end, lu);
+
+                group.begin = start;
+                group.end = stop;
+
+                return group;
+        };
+
         /**
          *
          * @param level
@@ -267,16 +330,8 @@ function D3Drawer(main_container_name)
 
                 path_container = container.append("g").attr("class", "path_container");
 
-                for (var i = level.lowIndex() - 5; i < level.upIndex() + 5; i++) {
-
-                        var tile = level.tiles[i];
-                        if (!tile) continue;
-                        _this.drawTile(tile);
-                        var taker = this.taker(level.tiles[i], level.tiles[i + 1]);
-                        if (taker) {
-                                _this.drawTile(taker);
-                        }
-                }
+                var grp = this.buildGroup(level);
+                this.drawTile(grp.data);
 
         };
 
@@ -284,10 +339,11 @@ function D3Drawer(main_container_name)
         {
                 if (!tile) return;
                 tile.forEach(function (channel, index)
-                {
-                        if(!_this.disabledChans[index])
-                                _this.drawChannel(channel, index);
-                });
+                             {
+                                     if (!_this.disabledChans[index]) {
+                                             _this.drawChannel(channel, index);
+                                     }
+                             });
         };
 
         this.drawChannel = function (channel, index)
@@ -316,37 +372,37 @@ function D3Drawer(main_container_name)
                 const cls = "line";
 
                 path_container.append("path")
-                        .datum(data)
-                        .attr("class", cls)
-                        .attr("style", STYLE_LINE)
-                        .attr("id", "chan" + chan)
-                        .attr("d", min_line);
+                    .datum(data)
+                    .attr("class", cls)
+                    .attr("style", STYLE_LINE)
+                    .attr("id", "chan" + chan)
+                    .attr("d", min_line);
 
                 path_container.append("path")
-                        .datum(data)
-                        .attr("class", cls)
-                        .attr("style", STYLE_LINE)
-                        .attr("id", "chan" + chan)
-                        .attr("d", min_line);
+                    .datum(data)
+                    .attr("class", cls)
+                    .attr("style", STYLE_LINE)
+                    .attr("id", "chan" + chan)
+                    .attr("d", min_line);
 
                 path_container.append("path")
-                        .datum(data)
-                        .attr("class", cls)
-                        .attr("style", STYLE_LINE)
-                        .attr("id", "chan" + chan)
-                        .attr("d", max_line);
+                    .datum(data)
+                    .attr("class", cls)
+                    .attr("style", STYLE_LINE)
+                    .attr("id", "chan" + chan)
+                    .attr("d", max_line);
 
                 var area_mm = d3.svg.area()
-                        .x(max_line.x())
-                        .y0(min_line.y())
-                        .y1(max_line.y());
+                    .x(max_line.x())
+                    .y0(min_line.y())
+                    .y1(max_line.y());
 
                 path_container.append("path")
-                        .datum(data)
-                        .attr("class", "area" + chan)
-                        .attr("d", area_mm)
-                        .attr("fill", "steelblue")
-                        .style("opacity", "0.3");
+                    .datum(data)
+                    .attr("class", "area" + chan)
+                    .attr("d", area_mm)
+                    .attr("fill", "steelblue")
+                    .style("opacity", "0.3");
         };
 
         this.moveY = function (dir)
@@ -381,10 +437,10 @@ function D3Drawer(main_container_name)
                 }
 
                 path_container.append("path")
-                        .datum(data)
-                        .attr("class", cls)
-                        .attr("id", "chan" + chan)
-                        .attr("d", line);
+                    .datum(data)
+                    .attr("class", cls)
+                    .attr("id", "chan" + chan)
+                    .attr("d", line);
                 return line;
         };
 
