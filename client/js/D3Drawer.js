@@ -32,6 +32,7 @@ function D3Drawer(main_container_name)
         this.domain = window.icfg.domain;
         this.domain.x = [0, 900];
         this.domain.y = [0, 2000];
+        this.strokeColor = "steelblue";
 
         this.drawTiles = true;
 
@@ -46,7 +47,6 @@ function D3Drawer(main_container_name)
         };
 
         const STYLE_AXIS = " fill: none;stroke: #000";
-        const STYLE_LINE = STYLE_AXIS + "shape-rendering: crispEdges;stroke: steelblue;stroke-width: 1.5px;";
 
         // Init
         var min_line = d3.svg.line()
@@ -347,6 +347,7 @@ function D3Drawer(main_container_name)
         this.drawMinMax = function (data, chan)
         {
 
+                const STYLE_LINE = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + this.strokeColor + ";stroke-width: 1.2px;";
                 const cls = "line";
 
                 path_container.append("path")
@@ -413,10 +414,10 @@ function D3Drawer(main_container_name)
                 if (mm) {
                         cls += " " + mm;
                 }
-
+                const STYLE_LINE = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + this.strokeColor + ";stroke-width: 1.2px;";
                 path_container.append("path")
                     .datum(data)
-                    .attr("class", cls)
+                    .attr("style", STYLE_LINE)
                     .attr("id", "chan" + chan)
                     .attr("d", line);
                 return line;
