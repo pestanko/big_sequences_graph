@@ -26,6 +26,8 @@ function ConnectionManager(host)
         this.wsocket.onopen = function ()
         {
                 _this.log.info("[INFO] WebSocket connected to remote host [%s] ", host);
+                window.icfg.status = 1;
+                window.stat.updateConnectionStatus(1);
         };
 
         /**
@@ -68,6 +70,8 @@ function ConnectionManager(host)
         this.wsocket.onclose = function ()
         {
                 _this.log.info("[INFO] WebSocket closed connection.")
+                window.icfg.status = 0;
+                window.stat.updateConnectionStatus(0);
         };
 
         /**

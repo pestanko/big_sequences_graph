@@ -12,7 +12,8 @@ window.icfg =
         factor   : 1,
         domain   : {x: [0, 1000], y: [0, 2000]},
         threshold: 20,
-        position : {beg: 0, end: 1000000}
+        position : {beg: 0, end: 1000000},
+        status : 0
 };
 
 /**
@@ -115,5 +116,10 @@ window.stat =
                 var diff = max - lvl;
 
                 return (Math.pow(window.config.tile_size, diff)) * index;
+        },
+
+        updateConnectionStatus: function(status)
+        {
+                return null;
         }
 };

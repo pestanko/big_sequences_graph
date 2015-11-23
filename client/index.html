@@ -176,6 +176,12 @@
         val_node.value = window.icfg.factor;
 
 
+        window.stat.updateConnectionStatus = function(stat)
+        {
+            window.icfg.status = stat;
+            $("#conn_status").text((stat) ? "Connected" : "Disconnected");
+        };
+
 
         function change_width(num)
         {
