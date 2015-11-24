@@ -81,6 +81,7 @@
 
         div.hidden {
             display: none;
+            visibility: hidden;
         }
 
 
@@ -149,7 +150,8 @@
         </div>
     </div>
 
-    <div id="hid_cont" class="dialog" class="hidden">
+    <div id="hid_cont" class="dialog hidden">
+
         <div id="chan_opt" title="Select channels">
             <p> Enabled channels: </p>
             <ul id="chan_cont">
@@ -167,8 +169,11 @@
                     <input type="color" id="bg_color">
                 </li>
                 <li>
-                    Foreground color:
+                    Stroke color:
                     <input type="color" id="fg_color">
+                </li> <li>
+                    Area color:
+                    <input type="color" id="area_color">
                 </li>
             </ul>
         </div>
@@ -178,6 +183,8 @@
                 <li>This is help!</li>
             </ul>
         </div>
+
+
     </div>
 
     <div id="Messages">
@@ -226,10 +233,18 @@
         }
         var bg_color =$("#bg_color");
         var fg_color =$("#fg_color");
+        var area_color=$("#area_color");
+
 
         fg_color.on('input', function(){
             console.log("Color changed!", fg_color.val());
             drawer.strokeColor = fg_color.val();
+            drawer.redrawLevel();
+        });
+
+        area_color.on('input', function(){
+            console.log("Color changed!", area_color.val());
+            drawer.areaColor = area_color.val();
             drawer.redrawLevel();
         });
 

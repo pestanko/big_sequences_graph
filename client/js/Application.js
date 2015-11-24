@@ -386,10 +386,10 @@ function ApplicationManager(host, drawer)
          */
         this.scaleX = function (dir)
         {
-                var scale_val = dir / 20;
-                this.drawer.scaleX(scale_val);
+                var scale_val = dir;
+                var scl = this.drawer.scaleX(scale_val);
                 this.drawer.drawLevel();
-                this.currLvl().scale(scale_val);
+                this.currLvl().scale(scl);
         };
 
         /**

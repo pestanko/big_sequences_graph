@@ -33,6 +33,7 @@ function D3Drawer(main_container_name)
         this.domain.x = [0, 900];
         this.domain.y = [0, 2000];
         this.strokeColor = "steelblue";
+        this.areaColor = "steelblue";
 
         this.drawTiles = true;
 
@@ -170,14 +171,12 @@ function D3Drawer(main_container_name)
 
                 container.append("g")
                     .attr("class", "x axis")
-                    // .attr("style", STYLE_AXIS)
                     .attr("transform", "translate(0," + height + ")")
                     .call(xAxis);
 
                 container.append("g")
                     .attr("class", "y axis")
                     .call(yAxis)
-                    // .attr("style", STYLE_AXIS)
                     .append("text")
                     .attr("transform", "rotate(-90)")
                     .attr("y", 6)
@@ -357,12 +356,6 @@ function D3Drawer(main_container_name)
                     .attr("id", "chan" + chan)
                     .attr("d", min_line);
 
-                path_container.append("path")
-                    .datum(data)
-                    .attr("class", cls)
-                    .attr("style", STYLE_LINE)
-                    .attr("id", "chan" + chan)
-                    .attr("d", min_line);
 
                 path_container.append("path")
                     .datum(data)
@@ -380,7 +373,7 @@ function D3Drawer(main_container_name)
                     .datum(data)
                     .attr("class", "area" + chan)
                     .attr("d", area_mm)
-                    .attr("fill", "steelblue")
+                    .attr("fill", this.areaColor)
                     .style("opacity", "0.3");
         };
 
@@ -396,16 +389,22 @@ function D3Drawer(main_container_name)
         {
                 var min = this.domain.y[0];
                 var max = this.domain.y[1];
-                this.domain.y = [min + dir, max - dir];
+                var diff = max - min;
+                var one_step = ((max / diff) * dir);
+                this.domain.y = [min + one_step, max - one_step];
                 this.updateAxes();
+                return one_step;
         };
 
         this.scaleX = function (dir)
         {
                 var min = this.domain.x[0];
                 var max = this.domain.x[1];
-                this.domain.x = [min + dir, max - dir];
+                var diff = max - min;
+                var one_step = ((max / diff) * dir) / 10;
+                this.domain.x = [min + one_step, max - one_step];
                 this.updateAxes();
+                return one_step;
         };
 
         this.drawPath = function (data, chan, mm)

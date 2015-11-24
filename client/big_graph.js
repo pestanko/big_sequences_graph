@@ -15,6 +15,8 @@ var big_graph = SAGE2_App.extend(
                     this.drawer = new D3Drawer("#" + this.container_name);
                     this.manager = new ApplicationManager(this.host, this.drawer);
                     this.element.style.backgroundColor = "#DDD";
+                    this.position = {x : 0, y: 0};
+                    this.dragging = false;
 
                     this.initializeWidgets();
             },
@@ -31,8 +33,12 @@ var big_graph = SAGE2_App.extend(
 
                     this.controls.addButton({type: "zoom-in", position: 10, identifier: "ZoomIn"});
                     this.controls.addButton({type: "zoom-out", position: 11, identifier: "ZoomOut"});
+
                     this.controls.addButton({type: "loop", position: 4, identifier: "Reload"});
                     this.controls.addButton({type: "refresh", position: 5, identifier: "Refresh"});
+
+                    this.controls.addTextInput({value: "", label: "Addr", identifier: "Address"});
+
 
                     this.controls.finishedAddingControls();
 
@@ -64,16 +70,26 @@ var big_graph = SAGE2_App.extend(
 
                     if (eventType === "pointerPress" && (data.button === "left")) {
 
-                            var x = position.x + this.element.getElementsByTagName("svg")[0].scrollLeft;
-
-                            var y = position.y + this.element.getElementsByTagName("svg")[0].scrollTop;
-
-                            console.log(x, y);
-                            this.element.elementFromPoint(x, y).click();
+                            this.dragging = true;
+                            this.position.x = position.x;
+                            this.position.y = position.y;
                     }
-                    if (eventType === "pointerMove") {
+                    if (eventType === "pointerMove" && this.dragging) {
+
+                            var diff_y = this.position.y - position.y;
+                            var diff_x = this.position.x - position.x;
+                            this.drawer.scaleY(diff_y / 2);
+                            this.manager.movePosNoDraw(diff_x / 10);
+                            this.drawer.drawLevel();
+                            this.position.x = position.x;
+                            this.position.y = position.y;
+                            this.refresh(date);
+
                     }
                     if (eventType === "pointerRelease" && (data.button === "left")) {
+                            this.dragging = false;
+                            this.position.x = position.x;
+                            this.position.y = position.y;
                     }
 
                     if (eventType === "pointerScroll") {
