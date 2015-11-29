@@ -12,6 +12,11 @@ function D3Drawer(main_container_name)
         this.log = Logger;
         this.currentLevel = null;
 
+        this.selectLine = {
+                x: 0,
+                show: false
+        };
+
         var margin = {top: 20, right: 20, bottom: 50, left: 50},
             width = getWidth() - margin.left - margin.right,
             height = getHeight() - margin.top - margin.bottom;
@@ -27,7 +32,6 @@ function D3Drawer(main_container_name)
 
         this.data = null;
         var _this = this;
-        var path_container = null;
         var container = null;
         this.domain = window.icfg.domain;
         this.domain.x = [0, 900];
@@ -170,11 +174,13 @@ function D3Drawer(main_container_name)
                 container = svg.append("g").attr("class", "container");
 
                 container.append("g")
+                    .attr("id", "x_axis")
                     .attr("class", "x axis")
                     .attr("transform", "translate(0," + height + ")")
                     .call(xAxis);
 
                 container.append("g")
+                    .attr("id", "y_axis")
                     .attr("class", "y axis")
                     .call(yAxis)
                     .append("text")
@@ -231,7 +237,7 @@ function D3Drawer(main_container_name)
                                         _this.redrawLevel(level);
                                 }
                         }
-                };
+                }
 
                 var interval = setInterval(reqTilesWait, 100);
         };
@@ -262,8 +268,8 @@ function D3Drawer(main_container_name)
                         };
                 }
                 var group = this.group;
-                var ll = level.lowIndex() - 5;
-                var lu = level.upIndex() + 5;
+                var ll = level.lowIndex();
+                var lu = level.upIndex() + 2;
                 var start = ll;
                 var stop = lu;
 
@@ -316,11 +322,13 @@ function D3Drawer(main_container_name)
         {
                 level = level || this.currentLevel;
 
-                if (path_container != null) {
-                        path_container.remove();
+                var area = d3.selectAll(".removable");
+
+                if (area.length) {
+                        area.remove();
                 }
 
-                path_container = container.append("g").attr("class", "path_container");
+                //path_container = container.append("g").attr("class", "path_container");
 
                 var grp = this.buildGroup(level);
                 this.drawTile(grp.data);
@@ -360,35 +368,43 @@ function D3Drawer(main_container_name)
 
         this.drawMinMax = function (data, chan)
         {
-
-                const STYLE_LINE = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + this.strokeColor +
-                                   ";stroke-width: 1.2px;";
-                const cls = "line";
-
-                path_container.append("path")
-                    .datum(data)
-                    .attr("class", cls)
-                    .attr("style", STYLE_LINE)
-                    .attr("id", "chan" + chan)
-                    .attr("d", min_line);
-
-                path_container.append("path")
-                    .datum(data)
-                    .attr("class", cls)
-                    .attr("style", STYLE_LINE)
-                    .attr("id", "chan" + chan)
-                    .attr("d", max_line);
-
                 var area_mm = d3.svg.area()
                     .x(max_line.x())
                     .y0(min_line.y())
                     .y1(max_line.y());
 
-                path_container.append("path")
+                container.append("path")
                     .datum(data)
-                    .attr("class", "area" + chan)
+                    .attr("class", " removable area" + chan)
                     .attr("d", area_mm)
-                    .attr("fill", this.areaColor)
+                    .attr("fill", this.strokeColor);
+
+                this.drawSelectLine();
+
+
+        };
+
+        this.drawSelectLine = function(posx)
+        {
+                if(posx) {
+                        var offset = $('#y_axis')[0].getBBox().width;
+                        this.selectLine.x = this.transformXCoord(posx - offset) + this.domain.x[0];
+                }
+                if(!this.selectLine.show) return;
+
+                const STYLE_SELECT = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + "red" +
+                                     ";stroke-width: 1.2px;";
+                var _x = _this.x(this.selectLine.x);
+                console.log("[%f] -> [%f]", this.selectLine.x, _x);
+
+                container.append("line")
+                    .attr("style", STYLE_SELECT)
+                    .attr("id", "select_line")
+                    .attr("class", "removable")
+                    .attr("x1", _x)
+                    .attr("x2", _x)
+                    .attr("y1", this.y(this.domain.y[0]))
+                    .attr("y2", this.y(this.domain.y[1]));
         };
 
         this.moveY = function (dir)
@@ -417,10 +433,12 @@ function D3Drawer(main_container_name)
         {
                 var min = this.domain.x[0];
                 var max = this.domain.x[1];
+                var coord_min = min;
+                var coord_max = max;
                 var one_step = this.transformXCoord(dir);
                 one_step *= window.icfg.scaleSpeedX;
                 this.log.debug("(scaleX): Scaling by  [%d] -> [%d]", dir, one_step);
-                this.domain.x = [min + one_step, max - one_step];
+                this.domain.x = [coord_min + one_step, coord_max - one_step];
                 this.updateAxes();
                 return one_step;
         };
@@ -433,9 +451,14 @@ function D3Drawer(main_container_name)
                 }
                 const STYLE_LINE = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + this.strokeColor +
                                    ";stroke-width: 1.2px;";
-                path_container.append("path")
+
+
+                this.drawSelectLine();
+
+                container.append("path")
                     .datum(data)
                     .attr("style", STYLE_LINE)
+                    .attr("class", "line removable")
                     .attr("id", "chan" + chan)
                     .attr("d", line);
                 return line;

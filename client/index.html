@@ -106,6 +106,7 @@
             <li class="inline" style="float:left;">
                 <button id="DialogHelp"> Help</button>
             </li>
+
             <li class="inline"> Status: <label id="conn_status">Disconnected</label></li>
             <li class="inline">
                 <input type="text" value="ws://localhost:10888/" id="ws_host"/>
@@ -150,6 +151,14 @@
         </div>
     </div>
 
+    <div id="status_bar">
+        <ul class="nice" style="text-align: left">
+            <li class="inline">
+                <em>X position: </em> <label id="text_sel_pos"></label>
+            </li>
+        </ul>
+    </div>
+
     <div id="hid_cont" class="dialog hidden">
 
         <div id="chan_opt" title="Select channels">
@@ -180,6 +189,11 @@
                 <li>
                     Stroke color:
                     <input type="color" id="fg_color">
+                </li>
+
+                <li>
+                    Show select line:
+                    <input type="checkbox" id="show_sel_line">
                 </li>
 
             </ul>
@@ -319,6 +333,12 @@
 
         var scSpeedX = $("#sc_speedX");
         var scSpeedY = $("#sc_speedY");
+        var sel_line = $("#show_sel_line");
+
+        sel_line.change(function()
+                        {
+                            drawer.selectLine.show = sel_line.prop('checked');
+                        });
 
         scSpeedX.change(function()
                         {
@@ -500,13 +520,15 @@
         main_graph.onclick = function (e)
         {
             if (!window.config) return;
-            var svg = d3.select(".path_container");
+            var svg = d3.select(".container");
             var w_pos = getCoords(svg.node());
             var x = e.clientX;
             var ix = drawer.getSelectX(x - w_pos.left);
 
             _this.selected = ix;
             drawer.drawLevel();
+            drawer.drawSelectLine(x);
+            $("#text_sel_pos").text(drawer.selectLine.x);
 
         };
 
@@ -563,12 +585,12 @@
             else if (e.keyCode == '37') {
                 // left arrow
                 if (!manager) return;
-                _this.moveByPos(-1);
+                _this.moveByPos(1);
             }
             else if (e.keyCode == '39') {
                 // right arrow
                 if (!manager) return;
-                _this.moveByPos(+1);
+                _this.moveByPos(-1);
 
             }
         };
