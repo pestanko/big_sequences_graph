@@ -41,7 +41,7 @@ function D3Drawer(main_container_name)
         this.disabledChans = [];
 
         this.group = {
-                level : null,
+                level: null,
                 begin: -1,
                 end  : -1,
                 data : []
@@ -236,8 +236,7 @@ function D3Drawer(main_container_name)
                 var interval = setInterval(reqTilesWait, 100);
         };
 
-
-        this.buildIntern = function(group, start, stop)
+        this.buildIntern = function (group, start, stop)
         {
                 var level = group.level;
                 for (var i = start; i < stop; i++) {
@@ -254,20 +253,19 @@ function D3Drawer(main_container_name)
 
         this.buildGroup = function (level)
         {
-                if(this.group.level != level){
+                if (this.group.level != level) {
                         this.group = {
                                 level: level,
                                 begin: -1,
-                                end: -1,
-                                data: []
+                                end  : -1,
+                                data : []
                         };
                 }
                 var group = this.group;
-                var ll = level.lowIndex()  - 5;
+                var ll = level.lowIndex() - 5;
                 var lu = level.upIndex() + 5;
                 var start = ll;
                 var stop = lu;
-
 
                 if (group.begin < 0 || group.end < 0) {
                         group.data = [];
@@ -282,7 +280,6 @@ function D3Drawer(main_container_name)
                 /* Add to begin*/
                 this.buildIntern(group, ll, group.begin);
 
-
                 /* Add to end*/
 
                 this.buildIntern(group, group.end, lu);
@@ -292,6 +289,24 @@ function D3Drawer(main_container_name)
 
                 return group;
         };
+
+
+        this.transformXCoord = function(coor)
+        {
+                var range = this.x.range();
+                var domain = this.x.domain();
+                var one_step = (domain[1] - domain[0]) / (range[1] - range[0]);
+                return coor * one_step;
+        };
+
+        this.transformYCoord = function(coor)
+        {
+                var range = this.y.range();
+                var domain = this.y.domain();
+                var one_step = (domain[1] - domain[0]) / (range[1] - range[0]);
+                return coor * one_step;
+        };
+
 
         /**
          *
@@ -346,7 +361,8 @@ function D3Drawer(main_container_name)
         this.drawMinMax = function (data, chan)
         {
 
-                const STYLE_LINE = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + this.strokeColor + ";stroke-width: 1.2px;";
+                const STYLE_LINE = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + this.strokeColor +
+                                   ";stroke-width: 1.2px;";
                 const cls = "line";
 
                 path_container.append("path")
@@ -355,7 +371,6 @@ function D3Drawer(main_container_name)
                     .attr("style", STYLE_LINE)
                     .attr("id", "chan" + chan)
                     .attr("d", min_line);
-
 
                 path_container.append("path")
                     .datum(data)
@@ -374,13 +389,14 @@ function D3Drawer(main_container_name)
                     .attr("class", "area" + chan)
                     .attr("d", area_mm)
                     .attr("fill", this.areaColor)
-                    .style("opacity", "0.3");
         };
 
         this.moveY = function (dir)
         {
                 var min = this.domain.y[0];
                 var max = this.domain.y[1];
+                this.y.domain(this.domain.y);
+                dir = this.transformYCoord(dir);
                 this.domain.y = [min + dir, max + dir];
                 this.updateAxes();
         };
@@ -389,8 +405,8 @@ function D3Drawer(main_container_name)
         {
                 var min = this.domain.y[0];
                 var max = this.domain.y[1];
-                var diff = max - min;
-                var one_step = ((max / diff) * dir);
+                var one_step = this.transformYCoord(dir);
+                this.log.debug("(scaleY): Scaling by  [%d] -> [%d]", dir, one_step);
                 this.domain.y = [min + one_step, max - one_step];
                 this.updateAxes();
                 return one_step;
@@ -400,8 +416,8 @@ function D3Drawer(main_container_name)
         {
                 var min = this.domain.x[0];
                 var max = this.domain.x[1];
-                var diff = max - min;
-                var one_step = ((max / diff) * dir) / 10;
+                var one_step = this.transformXCoord(dir);
+                this.log.debug("(scaleX): Scaling by  [%d] -> [%d]", dir, one_step);
                 this.domain.x = [min + one_step, max - one_step];
                 this.updateAxes();
                 return one_step;
@@ -413,7 +429,8 @@ function D3Drawer(main_container_name)
                 if (mm) {
                         cls += " " + mm;
                 }
-                const STYLE_LINE = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + this.strokeColor + ";stroke-width: 1.2px;";
+                const STYLE_LINE = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + this.strokeColor +
+                                   ";stroke-width: 1.2px;";
                 path_container.append("path")
                     .datum(data)
                     .attr("style", STYLE_LINE)

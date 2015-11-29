@@ -81,6 +81,7 @@ function ApplicationManager(host, drawer)
                             _this.calculateWindowSize();
                             _this.initLevels();
                             _this.internal_load();
+                            _this.movePos(0);
                     }
             }, 100);
 
@@ -328,7 +329,9 @@ function ApplicationManager(host, drawer)
          */
         this.movePos = function (dir)
         {
-                this.currLvl().moveVariable(dir, dir);
+                var rev = this.drawer.transformXCoord(dir);
+                this.log.debug("(movePos): Moving by [%d] -> [%d]", dir, rev);
+                this.currLvl().moveVariable(rev, rev);
                 this.draw();
         };
 
@@ -338,7 +341,9 @@ function ApplicationManager(host, drawer)
          */
         this.movePosNoDraw = function (dir)
         {
-                this.currLvl().moveVariable(dir, dir);
+                var rev = this.drawer.transformXCoord(dir);
+                this.log.debug("(movePosNoDraw): Moving by [%d] -> [%d]", dir, rev);
+                this.currLvl().moveVariable(rev, rev);
         };
 
         /**
@@ -386,8 +391,7 @@ function ApplicationManager(host, drawer)
          */
         this.scaleX = function (dir)
         {
-                var scale_val = dir;
-                var scl = this.drawer.scaleX(scale_val);
+                var scl = this.drawer.scaleX(dir);
                 this.drawer.drawLevel();
                 this.currLvl().scale(scl);
         };

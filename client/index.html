@@ -427,8 +427,8 @@
                 var diff_x = prev_mouseX - e.clientX;
                 prev_mouseY = e.clientY;
                 prev_mouseX = e.clientX;
-                drawer.scaleY(diff_y / 2);
-                manager.movePosNoDraw(diff_x / 10);
+                drawer.scaleY(diff_y);
+                manager.movePosNoDraw(diff_x);
                 drawer.redrawLevel();
             }
         };
