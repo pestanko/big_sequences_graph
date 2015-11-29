@@ -34,7 +34,7 @@ def main():
   fout.write(str(_number) + "\n");
 
   for i in range(_number):
-    tmp = math.sin(50*i) + (math.sin(i/20) * 100);
+    tmp = math.sin(i/30000)*120 +  math.sin(i/1000)*100 +  math.sin(50*i) + (math.sin(i/20) * 60);
     if(random.randint(0,1000) % 100  == 0):
       tmp *= 3
     sin_line = (_range_max + 600) + tmp
@@ -46,7 +46,7 @@ def main():
     if(random.randint(0,1000) % 100  == 0):
       tmp *= 3
     sin_line = (_range_max + 600) + tmp
-    number = sin_line + (random.randint(5, 20) * math.sin(i)) + 750
+    number = sin_line + (random.randint(5, 20) * math.sin(i)) + 900
     fout.write(str(number) + " ")
   fout.write("\n")
 
