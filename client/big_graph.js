@@ -6,7 +6,6 @@ var big_graph = SAGE2_App.extend(
                     this.SAGE2Init("div", data);
                     this.element.id = "container";
 
-
                     this.resizeEvents = "continuous"; //see below for other options
 
                     // initialize your variables
@@ -15,7 +14,7 @@ var big_graph = SAGE2_App.extend(
                     this.drawer = new D3Drawer("#" + this.container_name);
                     this.manager = new ApplicationManager(this.host, this.drawer);
                     this.element.style.backgroundColor = "#DDD";
-                    this.position = {x : 0, y: 0};
+                    this.position = {x: 0, y: 0};
                     this.dragging = false;
 
                     this.initializeWidgets();
@@ -38,7 +37,6 @@ var big_graph = SAGE2_App.extend(
                     this.controls.addButton({type: "refresh", position: 5, identifier: "Refresh"});
 
                     this.controls.addTextInput({value: "", label: "Addr", identifier: "Address"});
-
 
                     this.controls.finishedAddingControls();
 
@@ -117,12 +115,12 @@ var big_graph = SAGE2_App.extend(
                                             this.manager.moveLevel(-1);
                                             break;
                                     case "ZoomIn":
-                                            this.manager.scaleX(-500);
-                                        this.manager.draw();
+                                            this.manager.scaleX(5);
+                                            this.manager.draw();
 
                                             break;
                                     case "ZoomOut":
-                                            this.manager.scaleX(500);
+                                            this.manager.scaleX(5);
                                             this.manager.draw();
 
                                             break;

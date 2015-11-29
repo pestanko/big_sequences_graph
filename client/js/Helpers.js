@@ -13,7 +13,9 @@ window.icfg =
         domain   : {x: [0, 1000], y: [0, 2000]},
         threshold: 20,
         position : {beg: 0, end: 1000000},
-        status : 0
+        status : 0,
+        scaleSpeedY: 0.8,
+        scaleSpeedX: 0.5
 };
 
 /**

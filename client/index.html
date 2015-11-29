@@ -158,12 +158,21 @@
             </ul>
         </div>
 
-        <div id="options" class="dialog" title="Options">
+        <div id="options" class="dialog" style="width: 500px" title="Options">
             <ul>
-                <li>
-                    <input type="text" value="1" id="factor_val"/>
-                    <button id="factor_set">Factor</button>
+                <li>Factor(<label id="text_factor">1</label>):
+                    <input value="1" type="range" id="factor_val" min="0.1" max="2" step="0.1">
                 </li>
+                <li>Scale Speed X(<label id="text_speedX"> 0.5 </label>):
+                    <input id="sc_speedX" value="0.5" type="range" min="0.1" max="1" step="0.05">
+
+                </li>
+                <li>Scale Speed Y(<label id="text_speedY"> 0.8 </label>):
+                    <input id="sc_speedY" value="0.8" type="range" min="0.1" max="1" step="0.05">
+
+                </li>
+
+
                 <li>
                     Background color:
                     <input type="color" id="bg_color">
@@ -171,14 +180,12 @@
                 <li>
                     Stroke color:
                     <input type="color" id="fg_color">
-                </li> <li>
-                    Area color:
-                    <input type="color" id="area_color">
                 </li>
+
             </ul>
         </div>
 
-        <div id="help" class="dialog" title="Help">
+        <div id="help" style="width: 500px"  class="dialog" title="Help">
             <ul>
                 <li>This is help!</li>
             </ul>
@@ -256,12 +263,12 @@
 
         d3.select("#DialogOptions").on("click", function ()
         {
-            $("#options").dialog();
+            $("#options").dialog({minWidth:400});
         });
 
         d3.select("#DialogHelp").on("click", function ()
         {
-            $("#help").dialog();
+            $("#help").dialog({minWidth:400});
         });
 
         d3.select("#DialogChan").on("click", function ()
@@ -306,19 +313,39 @@
 
             var chan = $("#chan_opt");
 
-            chan.dialog();
+            chan.dialog({minWidth:400});
 
         });
 
-        d3.select("#factor_set").on("click", function ()
-        {
-            var val_node = d3.select("#factor_val").node();
-            var cfg = window.icfg;
-            cfg.factor = val_node.value;
-            manager.calculateWindowSize();
-            _this.moveByPos(0);
-            drawer.reload();
-        });
+        var scSpeedX = $("#sc_speedX");
+        var scSpeedY = $("#sc_speedY");
+
+        scSpeedX.change(function()
+                        {
+                            var val = scSpeedX.val();
+                            window.icfg.scaleSpeedX = val;
+                            $("#text_speedX").text(val);
+                        });
+        scSpeedY.change(function()
+                        {
+                            var val = scSpeedY.val();
+                            window.icfg.scaleSpeedY = val;
+                            $("#text_speedY").text(val);
+
+                        });
+
+
+
+        var factorVal = $("#factor_val");
+        factorVal.change(function()
+                                {
+                                    var cfg = window.icfg;
+                                    cfg.factor = factorVal.val();
+                                    $("#text_factor").text(factorVal.val());
+                                    manager.calculateWindowSize();
+                                    _this.moveByPos(0);
+                                    drawer.reload();
+                                });
 
         d3.select("#sizeInc").on("click", function ()
         {

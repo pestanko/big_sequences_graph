@@ -406,6 +406,7 @@ function D3Drawer(main_container_name)
                 var min = this.domain.y[0];
                 var max = this.domain.y[1];
                 var one_step = this.transformYCoord(dir);
+                one_step *= window.icfg.scaleSpeedY;
                 this.log.debug("(scaleY): Scaling by  [%d] -> [%d]", dir, one_step);
                 this.domain.y = [min + one_step, max - one_step];
                 this.updateAxes();
@@ -417,6 +418,7 @@ function D3Drawer(main_container_name)
                 var min = this.domain.x[0];
                 var max = this.domain.x[1];
                 var one_step = this.transformXCoord(dir);
+                one_step *= window.icfg.scaleSpeedX;
                 this.log.debug("(scaleX): Scaling by  [%d] -> [%d]", dir, one_step);
                 this.domain.x = [min + one_step, max - one_step];
                 this.updateAxes();
