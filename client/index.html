@@ -285,16 +285,20 @@
             $("#help").dialog({minWidth:400});
         });
 
+
         d3.select("#DialogChan").on("click", function ()
         {
             if (!manager) return;
 
             var n_chan = window.config.channels;
 
+            d3.selectAll("li.diag_remove").remove();
+
             for (var i = 0; i < n_chan; i++) {
                 var ret = drawer.disabledChans[i];
                 var val = (ret) ? 0 : 1;
                 // create the necessary elements
+
                 var label = document.createElement("li");
                 var description = document.createTextNode("Channel " + i);
                 var checkbox = document.createElement("input");
@@ -306,6 +310,7 @@
                 checkbox.id = "ch_ch_" + i;
                 label.appendChild(checkbox);   // add the box to the element
                 label.appendChild(description);// add the description to the element
+                label.className= label.className + " diag_remove";
 
                 checkbox.onclick = function (event)
                 {

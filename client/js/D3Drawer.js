@@ -267,13 +267,15 @@ function D3Drawer(main_container_name)
                                 data : []
                         };
                 }
+
                 var group = this.group;
                 var ll = level.lowIndex();
                 var lu = level.upIndex() + 2;
                 var start = ll;
                 var stop = lu;
 
-                if (group.begin < 0 || group.end < 0) {
+                if (group.begin < 0 && group.end < 0)
+                {
                         group.data = [];
                         for (var i = 0; i < window.config.channels; i++) {
                                 group.data.push([]);
@@ -349,6 +351,11 @@ function D3Drawer(main_container_name)
         this.drawChannel = function (channel, index)
         {
                 if (!channel) return;
+                if(!channel[0])
+                {
+                        this.log.error("Cannot find channel @ index [%d]", index);
+                        return;
+                }
 
                 if (channel[0].y) // Test if there is Y property
                 {
