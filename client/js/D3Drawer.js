@@ -353,7 +353,7 @@ function D3Drawer(main_container_name)
                 if (!channel) return;
                 if(!channel[0])
                 {
-                        this.log.error("Cannot find channel @ index [%d]", index);
+                        this.log.warn("Cannot find channel @ index [%d]", index);
                         return;
                 }
 

@@ -29,7 +29,7 @@ def main():
 
   fout = open(os.path.abspath(_path), 'w')
   fout.write(str(_x_min) + " " + str(_x_max) + "\n");
-  fout.write(str(_range_min) + " " + str(_range_max) + "\n");
+  fout.write(str(-100) + " " + str(3000) + "\n");
 
   fout.write(str(_number) + "\n");
 
@@ -41,14 +41,16 @@ def main():
     number = sin_line + (random.randint(5, 20) * math.sin(i))
     fout.write(str(number) + " ")
   fout.write("\n")
-  for i in range(_number):
-    tmp = (math.sin(i/20) * 100);
-    if(random.randint(0,1000) % 100  == 0):
-      tmp *= 3
-    sin_line = (_range_max + 600) + tmp
-    number = sin_line + (random.randint(5, 20) * math.sin(i)) + 900
-    fout.write(str(number) + " ")
-  fout.write("\n")
+
+
+  #for i in range(_number):
+  #  tmp = (math.sin(i/20) * 100);
+  #  if(random.randint(0,1000) % 100  == 0):
+  #    tmp *= 3
+  #  sin_line = (_range_max + 600) + tmp
+  #  number = sin_line + (random.randint(5, 20) * math.sin(i)) + 900
+  #  fout.write(str(number) + " ")
+  #fout.write("\n")
 
 
 

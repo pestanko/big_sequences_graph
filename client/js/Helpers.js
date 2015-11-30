@@ -64,7 +64,7 @@ window.stat =
                 lvl = lvl || window.icfg.current.level;
 
                 var max = window.config.levels - 1;
-                var num = window.config.size / window.config.tile_size;
+                var num = Math.ceil(window.config.size / window.config.tile_size);
                 var diff = max - lvl;
 
                 if (diff < 0) {

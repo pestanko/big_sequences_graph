@@ -135,7 +135,7 @@ function DataHolder()
     this.levels = [];
     this.tiles = null;
     this.x_axis = [0 , 500];
-    this.y_axis = [50, 200];
+    this.y_axis = [-100, 6000];
     this.size = 10000000;
     this.levels_num = 1;
     this.step = 1;

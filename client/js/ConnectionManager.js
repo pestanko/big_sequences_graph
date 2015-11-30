@@ -90,6 +90,9 @@ function ConnectionManager(host)
                         channels          : message.channels
                 };
 
+                window.icfg.domain.x = window.config.x_axis;
+                window.icfg.domain.y = window.config.y_axis;
+
                 _this.log.info("[INFO] Updated config: " + window.config);
         };
 
