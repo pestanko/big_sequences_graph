@@ -412,5 +412,20 @@ function ApplicationManager(host, drawer)
         {
                 this.drawer.reload();
         };
+
+        this.loadlevel = function(dir)
+        {
+                var new_level = this.current.level + dir;
+                if (new_level < 0) {
+                        new_level = 0;
+                }
+                else if (new_level >= this.levels.length - 1) {
+                        new_level = this.levels.length - 1;
+                }
+
+                this.levels[new_level].loadBuffer();
+
+        }
+
 }
 

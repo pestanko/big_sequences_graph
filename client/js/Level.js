@@ -302,8 +302,24 @@ function WindowLevel(level, manager, raw)
                 var up = this.max_size + 10;
                 var low = 0;
 
+                const prefetch_factor_up = 0.2;
+                const prefetch_factor_down = 1.2;
+
                 if (nextLevel) {
                         low = nextLevel.max_size;
+                }
+                var reflvl = window.icfg.current.level;
+
+                if(diff > up * prefetch_factor_up)
+                {
+                        this.log.debug("[DEBUG](movePos)>>> Prefetch UP level data. Level [%d -> %d]", reflvl, reflvl - 1);
+                        manager.loadlevel(-1);
+                }
+
+                if(diff < low * prefetch_factor_down)
+                {
+                        this.log.debug("[DEBUG](movePos)>>> Prefetch LOW level data. Level[ %d -> %d]", reflvl, reflvl + 1);
+                        manager.loadlevel(+1);
                 }
 
                 if (diff > up) {
