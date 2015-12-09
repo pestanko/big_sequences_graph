@@ -389,7 +389,15 @@ function test()
 function main()
 {
     var app = new Application();
-    app.run(10888, "sin2.txt");
+    var myArgs = process.argv.slice(2);
+    console.log('Passed arguments: ', myArgs);
+    var file = "sin2.txt";
+    if(myArgs.length > 0)
+    {
+        file = myArgs[0];
+    }
+    console.log("Starting file:", file);
+    app.run(10888, file);
 }
 
 
