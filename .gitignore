@@ -1,4 +1,4 @@
 .idea
 target
-serverjs/num.txt
+serverjs/num*.txt
 *.sh
