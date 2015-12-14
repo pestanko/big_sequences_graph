@@ -15,7 +15,8 @@ window.icfg =
         position : {beg: 0, end: 1000000},
         status : 0,
         scaleSpeedY: 0.8,
-        scaleSpeedX: 0.5
+        scaleSpeedX: 0.5,
+        communication: "tiles"
 };
 
 /**

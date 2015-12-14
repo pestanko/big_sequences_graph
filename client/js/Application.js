@@ -246,42 +246,6 @@ function ApplicationManager(host, drawer)
                 this.drawer.drawLevel(level);
         };
 
-        /**
-         * Gets tile at spec. level and on spec. index
-         * @param level
-         * @param index
-         */
-        this.getTile = function (level, index)
-        {
-                var number_tiles = window.config.size / window.config.tile_size;
-                var lvl = this.levels[level];
-                var cont = this.contains;
-
-                if (level >= window.config.levels) {
-                        _this.log.info("[INFO] Reached maximum level [%d]", this.current.level);
-                        return;
-                }
-                else if (level < 0) {
-                        _this.log.info("[INFO] Reached minimum level [%d]", this.current.level);
-                        return;
-                }
-                if (index >= number_tiles) {
-                        _this.log.info("[INFO] Reached maximum index [%d]", this.currIndex());
-                        return;
-                }
-                else if (index < 0) {
-                        _this.log.info("[INFO] Reached minimum index [%d]", this.currIndex());
-                        return;
-                }
-
-                this.current.level = level;
-                lvl.toTile(index);
-                this.log.info("[INFO] Current  index [%d] ", this.currIndex());
-
-                if (!cont(level, index)) {
-                        this.connection.getTile(level, index);
-                }
-        };
 
         /**
          * Move to level

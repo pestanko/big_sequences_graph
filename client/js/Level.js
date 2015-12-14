@@ -221,7 +221,14 @@ function WindowLevel(level, manager, raw)
                 var upB = this.upBuffIndex();
                 var lowB = this.lowBuffIndex();
 
-                this.requestTiles(lowB, upB);
+                if (window.icfg.communication == "tiles") {
+                        this.requestTiles(lowB, upB);
+                }
+                else {
+                        for (var i = lowB; i < upB; i++) {
+                                this.requestTile(i);
+                        }
+                }
         };
 
         /**
@@ -310,14 +317,12 @@ function WindowLevel(level, manager, raw)
                 }
                 var reflvl = window.icfg.current.level;
 
-                if(diff > up * prefetch_factor_up)
-                {
+                if (diff > up * prefetch_factor_up) {
                         this.log.debug("[DEBUG](movePos)>>> Prefetch UP level data. Level [%d -> %d]", reflvl, reflvl - 1);
                         manager.loadlevel(-1);
                 }
 
-                if(diff < low * prefetch_factor_down)
-                {
+                if (diff < low * prefetch_factor_down) {
                         this.log.debug("[DEBUG](movePos)>>> Prefetch LOW level data. Level[ %d -> %d]", reflvl, reflvl + 1);
                         manager.loadlevel(+1);
                 }

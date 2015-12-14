@@ -38,15 +38,9 @@
             display: none;
         }
 
-        .line {
-            fill: none;
-            stroke: steelblue;
-            stroke-width: 1.5px;
-        }
-
         #container {
             width: 100%;
-            margin: auto;
+            margin: 0px auto;
         }
 
         ul li {
@@ -65,7 +59,7 @@
             text-align: center;
         }
 
-        #help > ul{
+        #help > ul {
             text-align: left;
         }
 
@@ -75,15 +69,46 @@
             box-shadow: 5px 5px 2px #AAA;
         }
 
-        #msg_holder {
-            height: 50px;
-        }
-
         div.hidden {
             display: none;
             visibility: hidden;
         }
 
+        #elems_menu {
+            width: 75%;
+            margin: 15px auto;
+        }
+
+        #elems_menu > ul {
+            background-color: #CCC;
+        }
+
+        #controls {
+            text-align: center;
+        }
+
+        #controls > ul {
+            background-color: #AAA;
+            width: 30%;
+            margin: 25px auto;
+        }
+
+        button {
+            border: 2px solid black;
+            background-color: #DDD;
+            border-radius: 5px;
+            padding: 5px;
+
+        }
+
+        button:hover {
+            border: 2px solid #DDD;
+            background-color: #555;
+            background: linear-gradient(to bottom, #7d7e7d 0%, #0e0e0e 100%);
+            color: #DDD;
+            border-radius: 5px;
+
+        }
 
     </style>
 
@@ -111,50 +136,79 @@
             <li class="inline">
                 <input type="text" value="ws://localhost:10888/" id="ws_host"/>
                 <button id="ws_connect">Connect!</button>
+                <button id="ws_disconnect">Disconnect!</button>
+
             </li>
-            <li style="float:right;" class="inline">
-                <label>Lvl:</label> <input type="text" value="" id="i_level"/>
-                <label>Tile:</label> <input type="text" value="" id="i_tile"/>
-                <button id="pos_set">Move</button>
-            </li>
+
         </ul>
 
     </div>
     <div id="controls">
         <ul class="nice">
             <li class="inline">
-                <button id="moveLeft">&lt;&lt;</button>
-                <button id="moveRight">&gt;&gt;</button>
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAuUlEQVRIS+3Vyw3CMBBF0ZuOKIF0QCoAKgMqgFJSAiVABaCR4iiCCM9P2QRvvLF8pOd5csNCq1nIYV3QBrgCHdBPIj4DL+Boif1XdAfgBDyAdoIJtAdkV2O1N0rDapCkk4JpoBRMC4UxCxTCrJAb80AuLAo9ASn2fShv6dhlmNax0x6ojLsg25kifyGiWSEXYoXciAUKIVoojGigFKQGpSE1SPpxA3YzH18prfrvs463+uLPg3/IHd0bR+dXG/TqbzEAAAAASUVORK5CYII="
+                     style="transform: rotate(180deg); height: 20px" id="moveLeft"/>
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAuUlEQVRIS+3Vyw3CMBBF0ZuOKIF0QCoAKgMqgFJSAiVABaCR4iiCCM9P2QRvvLF8pOd5csNCq1nIYV3QBrgCHdBPIj4DL+Boif1XdAfgBDyAdoIJtAdkV2O1N0rDapCkk4JpoBRMC4UxCxTCrJAb80AuLAo9ASn2fShv6dhlmNax0x6ojLsg25kifyGiWSEXYoXciAUKIVoojGigFKQGpSE1SPpxA3YzH18prfrvs463+uLPg3/IHd0bR+dXG/TqbzEAAAAASUVORK5CYII="
+                     style="height: 20px" id="moveRight"/>
             </li>
 
             <li class="inline">
-                <button id="moveLeftPos">&lt;</button>
-                <button id="moveRightPos">&gt;</button>
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAABvklEQVRIS72WjTEEQRCFv4sAESACRIAMyIAIEAEiQARkQAaIABEgAyKgvq0ZtebmZ0ep66qt29qb7df9+nX3zliQzRaEQw/QJrANLIfgPoBH4HlKsC0gnR4BxyOA1K+Al8AV4H3WakA7wG0AeAFuQvQxAzP0OgA2Asg+8JBDKgH58jXwGRzdNejZC4EsAYfh/tcrOSAzuQfMwvsiHQm4NJuN2e2mmaVAHn6FQSRrFRDP5QLw+RvwBayPz6RAZ8ApINcluqyLGZ/kKAKk0dqeA/obLAUySiPSWcn8T4qK9QiiWQVWckA6eAqRKteatcBshwtgK/bZOKNI21whC4g1sCgo6R2CzgGZbiy0h1RRyRSMlzaWtc8U1U+dpgDV6qVDa9EFFHntoU71Kem0SavU9YqhBGJ2VTF4wNrIrWqpybsG4nvOQ2mNk36uj6Y2rH1k1A7a1CY1bHGEJN5qIyg7wmpD1fQVRs9QlVJr3RyqMfC4JgRRUVPWhGslp8DBZ2vxCeBMM7u4+N5DNPZPXHz+urusT9fii5kZoUX3EjBnAjhBvP60ylOnRm0jjj9OjP5fPk4q7dT3V+srqM9b5fQ32j52G1wIQUcAAAAASUVORK5CYII="
+                     style="transform: rotate(180deg); height: 20px" id="moveLeftPos"/>
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAABvklEQVRIS72WjTEEQRCFv4sAESACRIAMyIAIEAEiQARkQAaIABEgAyKgvq0ZtebmZ0ep66qt29qb7df9+nX3zliQzRaEQw/QJrANLIfgPoBH4HlKsC0gnR4BxyOA1K+Al8AV4H3WakA7wG0AeAFuQvQxAzP0OgA2Asg+8JBDKgH58jXwGRzdNejZC4EsAYfh/tcrOSAzuQfMwvsiHQm4NJuN2e2mmaVAHn6FQSRrFRDP5QLw+RvwBayPz6RAZ8ApINcluqyLGZ/kKAKk0dqeA/obLAUySiPSWcn8T4qK9QiiWQVWckA6eAqRKteatcBshwtgK/bZOKNI21whC4g1sCgo6R2CzgGZbiy0h1RRyRSMlzaWtc8U1U+dpgDV6qVDa9EFFHntoU71Kem0SavU9YqhBGJ2VTF4wNrIrWqpybsG4nvOQ2mNk36uj6Y2rH1k1A7a1CY1bHGEJN5qIyg7wmpD1fQVRs9QlVJr3RyqMfC4JgRRUVPWhGslp8DBZ2vxCeBMM7u4+N5DNPZPXHz+urusT9fii5kZoUX3EjBnAjhBvP60ylOnRm0jjj9OjP5fPk4q7dT3V+srqM9b5fQ32j52G1wIQUcAAAAASUVORK5CYII="
+                     style="height: 20px" id="moveRightPos"/>
             </li>
             <li class="inline">
-                <button id="scaleDown"> -</button>
-                <button id="scaleUp"> +</button>
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAABvklEQVRIS72WjTEEQRCFv4sAESACRIAMyIAIEAEiQARkQAaIABEgAyKgvq0ZtebmZ0ep66qt29qb7df9+nX3zliQzRaEQw/QJrANLIfgPoBH4HlKsC0gnR4BxyOA1K+Al8AV4H3WakA7wG0AeAFuQvQxAzP0OgA2Asg+8JBDKgH58jXwGRzdNejZC4EsAYfh/tcrOSAzuQfMwvsiHQm4NJuN2e2mmaVAHn6FQSRrFRDP5QLw+RvwBayPz6RAZ8ApINcluqyLGZ/kKAKk0dqeA/obLAUySiPSWcn8T4qK9QiiWQVWckA6eAqRKteatcBshwtgK/bZOKNI21whC4g1sCgo6R2CzgGZbiy0h1RRyRSMlzaWtc8U1U+dpgDV6qVDa9EFFHntoU71Kem0SavU9YqhBGJ2VTF4wNrIrWqpybsG4nvOQ2mNk36uj6Y2rH1k1A7a1CY1bHGEJN5qIyg7wmpD1fQVRs9QlVJr3RyqMfC4JgRRUVPWhGslp8DBZ2vxCeBMM7u4+N5DNPZPXHz+urusT9fii5kZoUX3EjBnAjhBvP60ylOnRm0jjj9OjP5fPk4q7dT3V+srqM9b5fQ32j52G1wIQUcAAAAASUVORK5CYII="
+                     style="height: 20px; transform: rotate(90deg)" id="yDown">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAABvklEQVRIS72WjTEEQRCFv4sAESACRIAMyIAIEAEiQARkQAaIABEgAyKgvq0ZtebmZ0ep66qt29qb7df9+nX3zliQzRaEQw/QJrANLIfgPoBH4HlKsC0gnR4BxyOA1K+Al8AV4H3WakA7wG0AeAFuQvQxAzP0OgA2Asg+8JBDKgH58jXwGRzdNejZC4EsAYfh/tcrOSAzuQfMwvsiHQm4NJuN2e2mmaVAHn6FQSRrFRDP5QLw+RvwBayPz6RAZ8ApINcluqyLGZ/kKAKk0dqeA/obLAUySiPSWcn8T4qK9QiiWQVWckA6eAqRKteatcBshwtgK/bZOKNI21whC4g1sCgo6R2CzgGZbiy0h1RRyRSMlzaWtc8U1U+dpgDV6qVDa9EFFHntoU71Kem0SavU9YqhBGJ2VTF4wNrIrWqpybsG4nvOQ2mNk36uj6Y2rH1k1A7a1CY1bHGEJN5qIyg7wmpD1fQVRs9QlVJr3RyqMfC4JgRRUVPWhGslp8DBZ2vxCeBMM7u4+N5DNPZPXHz+urusT9fii5kZoUX3EjBnAjhBvP60ylOnRm0jjj9OjP5fPk4q7dT3V+srqM9b5fQ32j52G1wIQUcAAAAASUVORK5CYII="
+                     style="height: 20px; transform: rotate(-90deg)" id="yUp">
             </li>
             <li class="inline">
-                <button id="yUp">Y-DOWN</button>
-                <button id="yDown">Y-UP</button>
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAABkklEQVRIS72W4TEEQRBG30WACBABIkAGZEAEiAARIAIyIIMjAkSADIiAelfTV2tu92b2ju2qrd0fM/P66+7p3hED2WggDn1A28AusJqc+wSegJcaZ0sgDz0BThuA/FyB18AN4HerzQPtAfcJ8ArcJe9DgQp9joCtBDkEHttIXSA33wJf6aCHQngOkiMrwHH6/rWlDaSSMaAKvzvDkcENs2pUt58ry0EufoNJkWz0gATT/e/AN7DZ3J+DLoBzwFiXwtUVTcNobi8Bz5tYDjJMemSSlzELZh1YawN5+DNwlsp1GZDX4QrYiXvWVBRhm0nkAsQoqKnTbSDlNivNy2gllUwHwywki2qap1pQTc5UUQWKuP576AYrBmWbG2NrtSxjlrd5ik4/c48Gu7CdLaRSXmcLm9dUlW9h9GmqNmNzXWyq4XiMCSG2/VLfs785VlRUPSYC5r0Q4IxRXQy+j7TAXhaDz7ezS2CvwRcwPfR++QhsMwF2D5+FRnl+qF6rsvlzovd/8nNSWWzlZaW/oPIJlSt+ABfLYhukkQvOAAAAAElFTkSuQmCC"
+                     style="height: 20px" id="scaleDown"/>
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAABp0lEQVRIS72WgTEEQRBF30WACBABIkAGZEAEiAARIAIyIANEgAiQARFQ72r6aszt3M46rqu2bqtuZn7/33+6d8SCYrQgHIYAbQLbwHJK7gN4BJ5bku0D8tAj4DgDKM8V8BK4AnzvjFlAO8BtAngBblL2wUCGPgfARgLZBx66kGpAbr4GPtNBdz3y7KVEloDD9P5jSxeQTO4BWfhelaMAV2bZyG63ZFYCufgVxiZZGwASmO5/A76A9Xx/CXQGnAJqXZPLwhsapCuU0dqeA543jhJImczIItciiq2stdAwq8BKF5CHPwEnya7zAMn2AtiKe5YzCtmmClkgtjAKQ02S7gKSbu40a6KTIkLWsiOYYIRG0lSTOrUC5TWrAeU1mwkUuv67dAszg/paG7XVLfO4zvopX3T6qXvUcmH7XNd0YastZAbD/K9qC5vVVKWvMYY0VZuxte5tqpFdjAlBbPstY8KxIqPmMRFg3gsBnDGyi8H3nhbYy2Lw+evssj6DBl+AmaH3y0fArhDA7uHzq1FeHmrWssw/Tsz+Tz5OGs3Wv6zvK6j/hMYV31NmbBuKmMnUAAAAAElFTkSuQmCC"
+                     style="height: 20px" id="scaleUp"/>
             </li>
             <li class="inline">
-                <button id="moveUp">UP</button>
-                <button id="moveDown">DOWN</button>
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAvElEQVRIS+3U0RGDIAyA4d8NOooj2E26QidxhW5SR+goblAvD/SCJ5CA5/UBnjw485FAGLhoDBc5dKi60r10p5XuBqzV0eIfo1j6jB7ADNyBTyM2Am/gCbwkloZkcQG+jVhAJPYUNr2/da3YIbLPKFSrFksiKUjmvVgWyUEerIiUIAtmQixQDjMjVugIkznpk+gK53rP86jqCxI2+euTUoN7IJ2ZfJsRT+n0hiUzGa5nyptRqULJ9Q79f+k2C5UzG8aAn6YAAAAASUVORK5CYII="
+                     style="height: 20px; transform: rotate(180deg)" id="moveUp"/>
+
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAvElEQVRIS+3U0RGDIAyA4d8NOooj2E26QidxhW5SR+goblAvD/SCJ5CA5/UBnjw485FAGLhoDBc5dKi60r10p5XuBqzV0eIfo1j6jB7ADNyBTyM2Am/gCbwkloZkcQG+jVhAJPYUNr2/da3YIbLPKFSrFksiKUjmvVgWyUEerIiUIAtmQixQDjMjVugIkznpk+gK53rP86jqCxI2+euTUoN7IJ2ZfJsRT+n0hiUzGa5nyptRqULJ9Q79f+k2C5UzG8aAn6YAAAAASUVORK5CYII="
+                     style="height: 20px;" id="moveDown"/>
             </li>
         </ul>
     </div>
 
-    <div id="grabber" class="nice" style="width: 99%;height: 700px;">
-        <div id="graph_container" style="width: 99%; height: 95%;">
+    <div id="grabber" class="nice" style="width: 99%;height: 700px; margin: 0 auto">
+        <div id="graph_container" style="width: 99%; height: 95%; margin: 0 auto;">
         </div>
     </div>
 
     <div id="status_bar">
-        <ul class="nice" style="text-align: left">
+        <ul class="nice" style="text-align: left; height: 20px">
             <li class="inline">
-                <em>X position: </em> <label id="text_sel_pos"></label>
+                <strong>Level:</strong> <label id="text_level"> </label>
+            </li>
+
+            <li class="inline">
+                <strong>Tiles:</strong> <label id="text_tiles"> </label>
+            </li>
+
+            <li class="inline">
+                <strong>Range X:</strong> <label id="text_range_x"> </label>
+            </li>
+            <li class="inline">
+                <stong>Range Y:</stong> <label id="text_range_y"> </label>
+            </li>
+            <li class="inline">
+                <strong>X position:</strong> <label id="text_sel_pos"> </label>
+            </li>
+
+
+            <li style="float: right">
+                Show select line:
+                <input type="checkbox" id="show_sel_line">
             </li>
         </ul>
     </div>
@@ -168,50 +222,47 @@
         </div>
 
         <div id="options" class="dialog" style="width: 500px" title="Options">
-            <ul>
-                <li>Factor(<label id="text_factor">1</label>):
-                    <input value="1" type="range" id="factor_val" min="0.1" max="2" step="0.1">
-                </li>
-                <li>Scale Speed X(<label id="text_speedX"> 0.5 </label>):
-                    <input id="sc_speedX" value="0.5" type="range" min="0.1" max="1" step="0.05">
+            <table style="text-align: center">
+                <tr>
+                    <td>Factor ( <label id="text_factor">1</label> )</td>
+                    <td><input value="1" type="range" id="factor_val" min="0.1" max="2" step="0.1"></td>
+                </tr>
+                <tr>
+                    <td>Scale Speed X ( <label id="text_speedX">0.5</label>)</td>
+                    <td><input id="sc_speedX" value="0.5" type="range" min="0.1" max="1" step="0.05"></td>
+                </tr>
+                <tr>
+                    <td>Scale Speed Y ( <label id="text_speedY">0.8</label> )</td>
+                    <td><input id="sc_speedY" value="0.8" type="range" min="0.1" max="1" step="0.05"></td>
+                </tr>
+                <tr>
+                    <td>Background color</td>
+                    <td><input type="color" id="bg_color" value="#ffffff"></td>
+                </tr>
+                <tr>
+                    <td>Stroke color</td>
+                    <td><input type="color" id="fg_color" value="#4682b4"></td>
+                </tr>
+                <tr>
+                    <td>Message type</td>
+                    <td>
+                        <select id="sel-comm-method">
+                        <option value="tiles">Tile interval</option>
+                        <option value="tile">One tile</option>
 
-                </li>
-                <li>Scale Speed Y(<label id="text_speedY"> 0.8 </label>):
-                    <input id="sc_speedY" value="0.8" type="range" min="0.1" max="1" step="0.05">
+                    </select>
+                    </td>
+                </tr>
 
-                </li>
+            </table>
 
-
-                <li>
-                    Background color:
-                    <input type="color" id="bg_color">
-                </li>
-                <li>
-                    Stroke color:
-                    <input type="color" id="fg_color">
-                </li>
-
-                <li>
-                    Show select line:
-                    <input type="checkbox" id="show_sel_line">
-                </li>
-
-            </ul>
         </div>
 
-        <div id="help" style="width: 500px"  class="dialog" title="Help">
-            <ul>
-                <li>This is help!</li>
-            </ul>
+        <div id="help" style="width: 500px" class="dialog" title="Help">
+            <p>This is help!</p>
+
+            <p> Icon pack used: <a href="https://icons8.com">Icon pack by Icons8</a></p>
         </div>
-
-
-    </div>
-
-    <div id="Messages">
-        <ul id="msg_holder">
-
-        </ul>
     </div>
 
 </div>
@@ -219,7 +270,6 @@
 
 <script>
     Logger.useDefaults();
-    Logger.info("Logger Ready ....");
 
     var main = function ()
     {
@@ -234,10 +284,29 @@
         var val_node = d3.select("#factor_val").node();
         val_node.value = window.icfg.factor;
 
+        this.updateStats = function ()
+        {
+            if (!manager) return;
+            var rangeX = $("#text_range_x");
+            var rangeY = $("#text_range_y");
+            var level = $("#text_level");
+            var tiles = $("#text_tiles");
+            var beg = drawer.domain.x[0];
+            var end = drawer.domain.x[1];
+
+            rangeX.text("[ " + beg + ", " + end + " ]");
+            rangeY.text("[ " + drawer.domain.y[0] + ", " + drawer.domain.y[1] + " ]");
+            level.text(window.icfg.current.level);
+            tiles.text( "[ " +window.stat.convertToTile(beg) + ", " + window.stat.convertToTile(end) + " ]");
+
+
+        };
+
         window.stat.updateConnectionStatus = function (stat)
         {
             window.icfg.status = stat;
             $("#conn_status").text((stat) ? "Connected" : "Disconnected");
+            _this.updateStats();
         };
 
         function change_width(num)
@@ -250,39 +319,56 @@
                 manager.moveByPos(0);
             }
             drawer.reload();
+            _this.updateStats();
 
         }
-        var bg_color =$("#bg_color");
-        var fg_color =$("#fg_color");
-        var area_color=$("#area_color");
+
+        $("#sel-comm-method").change(function()
+        {
+            switch ($("#sel-comm-method").value)
+            {
+                case "tiles":
+                        window.icfg.communication = "tiles";
+                            break;
+                case "tile":
+                        window.icfg.communication = "tile";
+                            break;
+            }
+        });
+
+        var bg_color = $("#bg_color");
+        var fg_color = $("#fg_color");
+        var area_color = $("#area_color");
 
 
-        fg_color.on('input', function(){
+        fg_color.on('input', function ()
+        {
             console.log("Color changed!", fg_color.val());
             drawer.strokeColor = fg_color.val();
             drawer.redrawLevel();
         });
 
-        area_color.on('input', function(){
+        area_color.on('input', function ()
+        {
             console.log("Color changed!", area_color.val());
             drawer.areaColor = area_color.val();
             drawer.redrawLevel();
         });
 
-        bg_color.on('input', function()
-                             {
-                                 console.log("Background Color changed!",  bg_color.val());
-                                 $("svg").css("background-color", bg_color.val());
-                             });
+        bg_color.on('input', function ()
+        {
+            console.log("Background Color changed!", bg_color.val());
+            $("svg").css("background-color", bg_color.val());
+        });
 
         d3.select("#DialogOptions").on("click", function ()
         {
-            $("#options").dialog({minWidth:400});
+            $("#options").dialog({minWidth: 400});
         });
 
         d3.select("#DialogHelp").on("click", function ()
         {
-            $("#help").dialog({minWidth:400});
+            $("#help").dialog({minWidth: 400});
         });
 
 
@@ -310,7 +396,7 @@
                 checkbox.id = "ch_ch_" + i;
                 label.appendChild(checkbox);   // add the box to the element
                 label.appendChild(description);// add the description to the element
-                label.className= label.className + " diag_remove";
+                label.className = label.className + " diag_remove";
 
                 checkbox.onclick = function (event)
                 {
@@ -324,6 +410,7 @@
                         drawer.chanStat(ch.value, 0);
                     }
                     drawer.redrawLevel();
+                    _this.updateStats();
                 };
 
                 // add the label element to your div
@@ -332,7 +419,7 @@
 
             var chan = $("#chan_opt");
 
-            chan.dialog({minWidth:400});
+            chan.dialog({minWidth: 400});
 
         });
 
@@ -340,43 +427,43 @@
         var scSpeedY = $("#sc_speedY");
         var sel_line = $("#show_sel_line");
 
-        sel_line.change(function()
-                        {
-                            drawer.selectLine.show = sel_line.prop('checked');
-                        });
+        sel_line.change(function ()
+        {
+            drawer.selectLine.show = sel_line.prop('checked');
+        });
 
-        scSpeedX.change(function()
-                        {
-                            var val = scSpeedX.val();
-                            window.icfg.scaleSpeedX = val;
-                            $("#text_speedX").text(val);
-                        });
-        scSpeedY.change(function()
-                        {
-                            var val = scSpeedY.val();
-                            window.icfg.scaleSpeedY = val;
-                            $("#text_speedY").text(val);
+        scSpeedX.change(function ()
+        {
+            var val = scSpeedX.val();
+            window.icfg.scaleSpeedX = val;
+            $("#text_speedX").text(val);
+        });
+        scSpeedY.change(function ()
+        {
+            var val = scSpeedY.val();
+            window.icfg.scaleSpeedY = val;
+            $("#text_speedY").text(val);
 
-                        });
-
+        });
 
 
         var factorVal = $("#factor_val");
-        factorVal.change(function()
-                                {
-                                    var cfg = window.icfg;
-                                    cfg.factor = factorVal.val();
-                                    $("#text_factor").text(factorVal.val());
-                                    manager.calculateWindowSize();
-                                    _this.moveByPos(0);
-                                    drawer.reload();
-                                });
+        factorVal.change(function ()
+        {
+            var cfg = window.icfg;
+            cfg.factor = factorVal.val();
+            $("#text_factor").text(factorVal.val());
+            manager.calculateWindowSize();
+            _this.moveByPos(0);
+            drawer.reload();
+            _this.updateStats();
+
+        });
 
         d3.select("#sizeInc").on("click", function ()
         {
             var inc = 50;
             change_width(inc);
-
         });
 
         d3.select("#sizeDec").on("click", function ()
@@ -431,14 +518,19 @@
             drawer.redrawLevel();
         });
 
-        d3.select("#ws_connect").on("click", function ()
+        $("#ws_connect").click(function ()
         {
             host = document.getElementById("ws_host").value;
             window.icfg.current.level = 0;
             manager = new ApplicationManager(host, drawer);
         });
+        $("#ws_disconnect").click(function ()
+        {
+            manager = null;
+            window.config = null;
+        });
 
-        var main_node = d3.select(graph_container).node();
+        var main_node = $(graph_container);
         main_node.onresize = function ()
         {
             console.log("Resize event called!");
@@ -482,18 +574,25 @@
                 drawer.scaleY(diff_y);
                 manager.movePosNoDraw(diff_x);
                 drawer.redrawLevel();
+                _this.updateStats();
             }
         };
 
         $('#grabber').mousewheel(function (event)
-                                 {
-                                     if (!window.config) return;
-                                     manager.scaleX(-event.deltaY * event.deltaFactor);
-                                     if (drawer.deltaX) {
-                                         drawer.scaleY(event.deltaX * event.deltaFactor);
-                                     }
-                                     drawer.drawLevel();
-                                 });
+        {
+            if (!window.config) return;
+
+            manager.scaleX(-event.deltaY * event.deltaFactor);
+
+            if (drawer.deltaX)
+            {
+                drawer.scaleY(event.deltaX * event.deltaFactor);
+            }
+            _this.updateStats();
+            drawer.drawLevel();
+
+
+        });
 
         var grb_d3 = d3.select("#grabber");
         var grabber = grb_d3.node();
@@ -520,6 +619,8 @@
             prev_mouseX = null;
             prev_mouseY = null;
             drawer.drawLevel();
+            _this.updateStats();
+
         };
 
         main_graph.onclick = function (e)
@@ -534,6 +635,7 @@
             drawer.drawLevel();
             drawer.drawSelectLine(x);
             $("#text_sel_pos").text(drawer.selectLine.x);
+            _this.updateStats();
 
         };
 
@@ -542,6 +644,7 @@
             if (!manager) return;
 
             manager.move(lvl_dir, ind_dir);
+            _this.updateStats();
 
         };
 
@@ -550,7 +653,7 @@
             if (!manager) return;
 
             manager.movePos(ind_dir);
-
+            _this.updateStats();
         };
 
         this.stepLvl = function (dir)
@@ -558,11 +661,12 @@
             if (!manager) return;
             if (_this.selected) {
                 manager.moveToPosition(dir, _this.selected);
-
             }
             else {
                 _this.moveByTile(dir, 0);
             }
+            _this.updateStats();
+
         };
 
         window.onkeydown = function checkKey(e)
@@ -575,7 +679,6 @@
                     host = document.getElementById("ws_host").value;
                     manager = new ApplicationManager(host, drawer);
                 }
-
             }
 
             if (e.keyCode == '38') {
@@ -598,6 +701,8 @@
                 _this.moveByPos(-1);
 
             }
+            _this.updateStats();
+
         };
 
         var addEvent = function (object, type, callback)
@@ -621,6 +726,7 @@
             if (_this.manager) {
                 _this.manager.calculateWindowSize();
                 _this.moveByPos(0);
+                _this.updateStats();
             }
 
         });
