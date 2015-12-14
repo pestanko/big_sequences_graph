@@ -324,8 +324,8 @@ function WindowLevel(level, manager, raw)
                 var up = this.max_size + 10;
                 var low = 0;
 
-                const prefetch_factor_up = 0.2;
-                const prefetch_factor_down = 1.2;
+                const prefetch_factor_up = 0.3;
+                const prefetch_factor_down = 1.3;
 
                 if (nextLevel) {
                         low = nextLevel.max_size;
