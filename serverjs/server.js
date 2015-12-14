@@ -5,6 +5,7 @@
 fs = require("fs");
 WebSocketServer = require("ws").Server;
 
+
 function Application()
 {
     this.wss = null;
@@ -142,6 +143,7 @@ function DataHolder()
     this.tile_size = 10;
     var _this=  this;
     this.chan_number = 2;
+    this.lines = [];
 
 
 
@@ -158,7 +160,7 @@ function DataHolder()
         return this.size/this.tile_size;
     };
 
-    
+
     this.level_size = function (level) {
         var max = this.levels_num - 1;
         var diff = max - level;
@@ -176,16 +178,8 @@ function DataHolder()
         var num_lines = 0 ;
         for(var l = offset; l < lines.length; l++)
         {
-            if(lines[l].length > 0) num_lines++;
+           if(lines[l].length > 0) num_lines++;
         }
-
-        this.num_chan = num_lines;
-        this.chan_number= this.num_chan;
-        var i = 0;
-
-        var lvls=  Math.ceil(Math.log(this.size) / Math.log(this.tile_size)) - 1;
-        console.log("[DEBUG] Number of levels : " + lvls);
-        this.levels = new Array(lvls);
         this.levels_num = lvls;
 
         for (var k = 0; k < lvls; k++) {
@@ -323,37 +317,46 @@ function DataHolder()
         return max;
     };
 
+    this.parseBuffer = function(lines)
+    {
+            var header_x = lines[0].split(" ");
+            var header_y = lines[1].split(" ");
+            console.log("Showing info: ");
+            _this.x_axis = [parseInt(header_x[0]), parseInt(header_x[1])];
+            _this.y_axis = [parseInt(header_y[0]), parseInt(header_y[1])];
+            _this.size = parseInt(lines[2]);
+            _this.calucalteStep();
+
+            console.log("[INFO] X Axis: " + _this.x_axis);
+            console.log("[INFO] Y Axis: " + _this.y_axis);
+            console.log("[INFO] Size: " + _this.size);
+            console.log("[INFO] Step: " + _this.step);
+            console.log("[INFO] Number of Tiles: " + _this.tilesCount());
+
+
+            _this.loadTiles(lines);
+            console.log("[INFO] - Ready ...");
+
+
+    }
+
     this.loadData = function(path)
     {
-        fs.readFile(path, {encoding: 'utf-8'}, function(err, data){
-            if(err)
-            {
-                console.log(err);
-            }
-            else
-            {
+                var rfile = require('readline').createInterface({
+                  input: require('fs').createReadStream(path)
+                });
+
+                var i = 0;
                 var buffer = null;
-                console.log("[DEBUG] Received data ...");
-                var lines = data.split("\n");
-                var header_x = lines[0].split(" ");
-                var header_y = lines[1].split(" ");
-                console.log("Showing info: ");
-                _this.x_axis = [parseInt(header_x[0]), parseInt(header_x[1])];
-                _this.y_axis = [parseInt(header_y[0]), parseInt(header_y[1])];
-                _this.size = parseInt(lines[2]);
-                _this.calucalteStep();
+                rfile.on('line', function (line) {
+                        i++;
+                        buffer = line;
+                        _this.lines.push(line);
 
-                console.log("[INFO] X Axis: " + _this.x_axis);
-                console.log("[INFO] Y Axis: " + _this.y_axis);
-                console.log("[INFO] Size: " + _this.size);
-                console.log("[INFO] Step: " + _this.step);
-                console.log("[INFO] Number of Tiles: " + _this.tilesCount());
-
-
-                _this.loadTiles(lines);
-                console.log("[INFO] - Ready ...");
-            }
-        });
+                });
+                rfile.on('close', function(){
+                        _this.parseBuffer(_this.lines);
+                });
     };
 
     this.getTileData = function(level, index)
@@ -402,7 +405,3 @@ function main()
 
 
 main();
-
-
-
-
