@@ -265,6 +265,11 @@ function D3Drawer(main_container_name)
                 }
         };
 
+        /**
+         *
+         * @param level
+         * @returns {{level: null, begin: number, end: number, data: Array}|*}
+         */
         this.buildGroup = function (level)
         {
                 if (this.group.level != level) {
@@ -306,7 +311,11 @@ function D3Drawer(main_container_name)
                 return group;
         };
 
-
+        /**
+         *
+         * @param coor
+         * @returns {number}
+         */
         this.transformXCoord = function(coor)
         {
                 var range = this.x.range();
@@ -314,7 +323,11 @@ function D3Drawer(main_container_name)
                 var one_step = (domain[1] - domain[0]) / (range[1] - range[0]);
                 return coor * one_step;
         };
-
+        /**
+         *
+         * @param coor
+         * @returns {number}
+         */
         this.transformYCoord = function(coor)
         {
                 var range = this.y.range();
@@ -351,6 +364,10 @@ function D3Drawer(main_container_name)
 
         };
 
+        /**
+         *
+         * @param tile
+         */
         this.drawTile = function (tile)
         {
                 if (!tile) return;
@@ -361,7 +378,11 @@ function D3Drawer(main_container_name)
                                      }
                              });
         };
-
+        /**
+         *
+         * @param channel
+         * @param index
+         */
         this.drawChannel = function (channel, index)
         {
                 if (!channel) return;
@@ -381,12 +402,22 @@ function D3Drawer(main_container_name)
                 }
         };
 
+        /**
+         *
+         * @param ix
+         * @returns {*}
+         */
         this.getSelectX = function (ix)
         {
                 var invert = this.x.invert(ix + curr_shift);
                 return invert;
         };
 
+        /**
+         *
+         * @param data
+         * @param chan
+         */
         this.drawMinMax = function (data, chan)
         {
                 var area_mm = d3.svg.area()
@@ -404,7 +435,10 @@ function D3Drawer(main_container_name)
 
 
         };
-
+        /**
+         *
+         * @param posx
+         */
         this.drawSelectLine = function(posx)
         {
                 if(posx) {
@@ -427,7 +461,10 @@ function D3Drawer(main_container_name)
                     .attr("y1", this.y(this.domain.y[0]))
                     .attr("y2", this.y(this.domain.y[1]));
         };
-
+        /**
+         *
+         * @param dir
+         */
         this.moveY = function (dir)
         {
                 var min = this.domain.y[0];
@@ -437,7 +474,11 @@ function D3Drawer(main_container_name)
                 this.domain.y = [min + dir, max + dir];
                 this.updateAxes();
         };
-
+        /**
+         *
+         * @param dir
+         * @returns {number}
+         */
         this.scaleY = function (dir)
         {
                 var min = this.domain.y[0];
@@ -450,6 +491,11 @@ function D3Drawer(main_container_name)
                 return one_step;
         };
 
+        /**
+         *
+         * @param dir
+         * @returns {number}
+         */
         this.scaleX = function (dir)
         {
                 var min = this.domain.x[0];
@@ -463,7 +509,13 @@ function D3Drawer(main_container_name)
                 this.updateAxes();
                 return one_step;
         };
-
+        /**
+         *
+         * @param data
+         * @param chan
+         * @param mm
+         * @returns {*}
+         */
         this.drawPath = function (data, chan, mm)
         {
                 var cls = "line";
