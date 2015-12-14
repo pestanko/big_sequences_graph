@@ -11,6 +11,7 @@ function D3Drawer(main_container_name)
         var main_node = main_container.node();
         this.log = Logger;
         this.currentLevel = null;
+        this.drawableLevel = null;
 
         this.selectLine = {
                 x: 0,
@@ -236,12 +237,19 @@ function D3Drawer(main_container_name)
                                 if (_this.drawTiles) {
                                         _this.redrawLevel(level);
                                 }
+                                _this.drawableLevel = level;
                         }
                 }
 
                 var interval = setInterval(reqTilesWait, 100);
         };
 
+        /**
+         * Builds
+         * @param group
+         * @param start
+         * @param stop
+         */
         this.buildIntern = function (group, start, stop)
         {
                 var level = group.level;
@@ -322,6 +330,12 @@ function D3Drawer(main_container_name)
          */
         this.redrawLevel = function (level)
         {
+                level = level || this.drawableLevel;
+                if(!level)
+                {
+                        this.log.warn("Cannot init drawable level !");
+                }
+
                 level = level || this.currentLevel;
 
                 var area = d3.selectAll(".removable");

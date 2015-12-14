@@ -95,7 +95,9 @@ function WindowLevel(level, manager, raw)
         this.lowBuffIndex = function (index)
         {
                 index = this.lowIndex(index);
-                var low_size = Math.floor(this.window_size());
+                var limit = this.window_size() / 4;
+                if(limit < 10) limit = 10;
+                var low_size = Math.floor(limit);
 
                 var lowB = index - low_size;
                 return (lowB < 0) ? 0 : lowB;
@@ -110,7 +112,9 @@ function WindowLevel(level, manager, raw)
         this.upBuffIndex = function (index)
         {
                 index = this.upIndex(index);
-                var up_size = Math.ceil(this.window_size());
+                var limit = this.window_size() / 4;
+                if(limit < 10) limit = 10;
+                var up_size = Math.ceil(limit);
 
                 var upB = index + up_size;
                 return (upB > lvl_size) ? lvl_size : upB;
@@ -220,12 +224,23 @@ function WindowLevel(level, manager, raw)
         {
                 var upB = this.upBuffIndex();
                 var lowB = this.lowBuffIndex();
+                var up = this.upIndex();
+                var low = this.lowIndex();
+                this.log.info("Requested interval: [%d,%d] of size %d.", lowB, upB, this.lowIndex() - this.lowBuffIndex());
 
                 if (window.icfg.communication == "tiles") {
-                        this.requestTiles(lowB, upB);
+                        this.requestTiles(low, up);
+                        this.requestTiles(up, upB);
+                        this.requestTiles(lowB, low);
                 }
                 else {
-                        for (var i = lowB; i < upB; i++) {
+                        for (var i = low; i < up; i++) {
+                                this.requestTile(i);
+                        }
+                        for (var i = up; i < upB; i++) {
+                                this.requestTile(i);
+                        }
+                        for (var i = lowB; i < low; i++) {
                                 this.requestTile(i);
                         }
                 }
