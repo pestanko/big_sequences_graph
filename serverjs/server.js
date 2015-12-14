@@ -180,6 +180,13 @@ function DataHolder()
         {
            if(lines[l].length > 0) num_lines++;
         }
+        this.num_chan = num_lines;
+        this.chan_number= this.num_chan;
+        var i = 0;
+        var lvls =  Math.ceil(Math.log(this.size) / Math.log(this.tile_size)) - 1;
+        console.log("[DEBUG] Number of levels : " + lvls);
+        this.levels = new Array(lvls);
+
         this.levels_num = lvls;
 
         for (var k = 0; k < lvls; k++) {
