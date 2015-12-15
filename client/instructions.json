@@ -13,8 +13,7 @@
       "js/D3Drawer.js",
       "js/Application.js",
       "js/ConnectionManager.js",
-      "js/Level.js",
-      "js/Holder.js"
+      "js/Level.js"
     ],
 
     "title": "HDR5 - Graphs",

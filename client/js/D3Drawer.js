@@ -12,6 +12,7 @@ function D3Drawer(main_container_name)
         this.log = Logger;
         this.currentLevel = null;
         this.drawableLevel = null;
+        this.lastDate = null;
 
         this.selectLine = {
                 x: 0,
@@ -52,7 +53,9 @@ function D3Drawer(main_container_name)
                 data : []
         };
 
-        const STYLE_AXIS = " fill: none;stroke: #000";
+        var STYLE_AXIS = " fill: none;stroke: #000";
+
+        var fpsElem = null;
 
         // Init
         var min_line = d3.svg.line()
@@ -139,7 +142,6 @@ function D3Drawer(main_container_name)
          */
         this.reload = function ()
         {
-
                 var cont = d3.select(main_container_name);
 
                 width = getWidth() - margin.left - margin.right;
@@ -157,6 +159,7 @@ function D3Drawer(main_container_name)
 
                 this.y = d3.scale.linear()
                     .range([height, 0]);
+
 
                 xAxis = d3.svg.axis()
                     .scale(this.x)
@@ -200,6 +203,7 @@ function D3Drawer(main_container_name)
          */
         this.drawLevel = function (level)
         {
+		if(!window.config) return;
                 level = level || this.currentLevel;
 
                 if (!level) return;
@@ -221,6 +225,7 @@ function D3Drawer(main_container_name)
                 level = level || this.currentLevel;
 
                 if (!level) return;
+		if(!window.config) return;
 
                 function reqTilesWait()
                 {
@@ -253,6 +258,7 @@ function D3Drawer(main_container_name)
         this.buildIntern = function (group, start, stop)
         {
                 var level = group.level;
+		if(!window.config) return;
                 for (var i = start; i < stop; i++) {
 
                         var tile = level.tiles[i];
@@ -272,6 +278,7 @@ function D3Drawer(main_container_name)
          */
         this.buildGroup = function (level)
         {
+		if(!window.config) return;
                 if (this.group.level != level) {
                         this.group = {
                                 level: level,
@@ -343,6 +350,7 @@ function D3Drawer(main_container_name)
          */
         this.redrawLevel = function (level)
         {
+		if(!window.config) return;
                 level = level || this.drawableLevel;
                 if(!level)
                 {
@@ -447,7 +455,7 @@ function D3Drawer(main_container_name)
                 }
                 if(!this.selectLine.show) return;
 
-                const STYLE_SELECT = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + "red" +
+                var STYLE_SELECT = STYLE_AXIS + "shape-rendering: crispEdges;stroke: " + "red" +
                                      ";stroke-width: 1.2px;";
                 var _x = _this.x(this.selectLine.x);
                 console.log("[%f] -> [%f]", this.selectLine.x, _x);

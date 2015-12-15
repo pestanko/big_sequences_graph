@@ -1,5 +1,14 @@
 var big_graph = SAGE2_App.extend(
     {
+	    openConnection: function()
+	    {
+		    this.drawer = new D3Drawer("#" + this.container_name);
+                    this.manager = new ApplicationManager(this.host, this.drawer);
+                    this.element.style.backgroundColor = "#DDD";
+                    this.position = {x: 0, y: 0};
+                    this.dragging = false;
+	    },
+	    
             init: function (data)
             {
                     // data: contains initialization parameters, such as `x`, `y`, `width`, `height`, and `date`
@@ -11,12 +20,7 @@ var big_graph = SAGE2_App.extend(
                     // initialize your variables
                     this.container_name = "container";
                     this.host = "ws://localhost:10888/";
-                    this.drawer = new D3Drawer("#" + this.container_name);
-                    this.manager = new ApplicationManager(this.host, this.drawer);
-                    this.element.style.backgroundColor = "#DDD";
-                    this.position = {x: 0, y: 0};
-                    this.dragging = false;
-
+                    this.openConnection();
                     this.initializeWidgets();
             },
 
@@ -33,11 +37,8 @@ var big_graph = SAGE2_App.extend(
                     this.controls.addButton({type: "zoom-in", position: 10, identifier: "ZoomIn"});
                     this.controls.addButton({type: "zoom-out", position: 11, identifier: "ZoomOut"});
 
-                    this.controls.addButton({type: "loop", position: 4, identifier: "Reload"});
                     this.controls.addButton({type: "refresh", position: 5, identifier: "Refresh"});
-
-                    this.controls.addTextInput({value: "", label: "Addr", identifier: "Address"});
-
+                    this.controls.addTextInput({value: "ws://localhost:9292", identifier: "Address"});
                     this.controls.finishedAddingControls();
 
             },
@@ -51,7 +52,16 @@ var big_graph = SAGE2_App.extend(
             draw: function (date)
             {
                     // application specific 'draw'
-                    this.log("Draw");
+
+                    //this.ctx.fillText("FPS: " + (1000.0 / (date.getTime() - this.lastDate.getTime())).toFixed(0), 10, 20);
+                  /*  var date = new Date();
+                    var n = date.getTime();
+                    var ld = this.lastDate.getTime();
+                    if(!ld)
+                            ld = n;
+                    d3.svg.text("FPS: " + (1000.0 / (n - ld)).toFixed(0) );*/
+
+
             },
 
             resize: function (date)
@@ -77,7 +87,7 @@ var big_graph = SAGE2_App.extend(
                             var diff_y = this.position.y - position.y;
                             var diff_x = this.position.x - position.x;
                             this.drawer.scaleY(diff_y / 2);
-                            this.manager.movePosNoDraw(diff_x / 10);
+                            this.manager.movePosNoDraw(diff_x);
                             this.drawer.drawLevel();
                             this.position.x = position.x;
                             this.position.y = position.y;
@@ -91,45 +101,60 @@ var big_graph = SAGE2_App.extend(
                     }
 
                     if (eventType === "pointerScroll") {
-                            this.drawer.scaleX(data.wheelDelta);
+                            console.log("Scrooling! [%d]", data.wheelDelta);
+                            this.manager.scaleX(data.wheelDelta);
+			    this.refresh(date);
                     }
 
                     if (eventType === "widgetEvent") {
                             switch (data.identifier) {
                                     case "Back":
                                             this.manager.moveTile(-1);
+
                                             break;
                                     case "Forward":
                                             this.manager.moveTile(+1);
+
                                             break;
                                     case "Left":
                                             this.manager.movePos(-2);
+
                                             break;
                                     case "Right":
                                             this.manager.movePos(2);
-                                            break;
-                                    case "Up":
-                                            this.manager.moveLevel(+1);
-                                            break;
-                                    case "Down":
-                                            this.manager.moveLevel(-1);
-                                            break;
-                                    case "ZoomIn":
-                                            this.manager.scaleX(5);
-                                            this.manager.draw();
 
                                             break;
+                                    case "Up":
+                                            this.drawer.moveY(+1);
+
+                                            break;
+                                    case "Down":
+                                            this.drawer.moveY(-1);
+
+                                            break;
+                                    case "ZoomIn":
+                                            this.manager.scaleX(-5);
+                                            this.manager.draw();
+                                            break;
                                     case "ZoomOut":
-                                            this.manager.scaleX(5);
+                                            this.manager.scaleX(+5);
                                             this.manager.draw();
 
                                             break;
                                     case "Reload":
                                             this.manager.reload();
+
                                             break;
                                     case "Refresh":
                                             this.manager.connect();
+
                                             break;
+                                    case "Address":
+                                        this.host = data.text;
+                                   	this.openConnection();
+					//this.refresh(date);
+                                    break;
+				    
                                     default:
                                             console.log("No handler for:", data.identifier);
                             }
@@ -138,7 +163,8 @@ var big_graph = SAGE2_App.extend(
                     // may need to update state here
 
                     // may need to redraw
-                    this.refresh(date);
+		    this.refresh(date);
+                    
             },
 
             move: function (date)

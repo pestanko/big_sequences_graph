@@ -21,6 +21,7 @@ function ApplicationManager(host, drawer)
         this.host = host || "ws://localhost:10888";
         this.levels = null;
 
+
         // Global Variable containing configuration from server
         window.config = null;
 
@@ -32,8 +33,10 @@ function ApplicationManager(host, drawer)
         /**
          * Reconnects to WS Server
          */
-        this.connect = function ()
+        this.connect = function (host)
         {
+                host = host || this.host;
+		window.config = null;
                 this.connection = new ConnectionManager(host);
         };
 
@@ -76,6 +79,7 @@ function ApplicationManager(host, drawer)
             function ()
             {
                     if (window.config) {
+			    console.log(window.config);
                             clearInterval(interval);
                             _this.drawer.requestWindowSize();
                             _this.calculateWindowSize();

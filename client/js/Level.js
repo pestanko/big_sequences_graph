@@ -333,12 +333,10 @@ function WindowLevel(level, manager, raw)
                 var reflvl = window.icfg.current.level;
 
                 if (diff > up * prefetch_factor_up) {
-                        this.log.debug("[DEBUG](movePos)>>> Prefetch UP level data. Level [%d -> %d]", reflvl, reflvl - 1);
                         manager.loadlevel(-1);
                 }
 
                 if (diff < low * prefetch_factor_down) {
-                        this.log.debug("[DEBUG](movePos)>>> Prefetch LOW level data. Level[ %d -> %d]", reflvl, reflvl + 1);
                         manager.loadlevel(+1);
                 }
 
