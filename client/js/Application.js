@@ -320,6 +320,7 @@ function ApplicationManager(host, drawer)
          */
         this.moveLevelClean = function (dir)
         {
+                console.log("------------------- New level ------------------------------");
                 var new_level = this.current.level + dir;
 
                 if (new_level < 0) {
@@ -329,13 +330,14 @@ function ApplicationManager(host, drawer)
                         new_level = this.levels.length - 1;
                 }
 
-                for (var i = 1; i < _this.levels.length; i++) {
+                for (var i = 0; i < _this.levels.length; i++) {
                         var lev = _this.levels;
-                        if ((i + 1) > new_level || (i - 1) < new_level) {
-                                this.log.info("[DELETE] - Deleting level [%d].", i);
-                                lev[i] = null;
-                                lev[i] = new WindowLevel(i, this, false);
-                        }
+                        if(new_level - 1 == i || new_level == i) continue;
+                        if(new_level + 1 == i) continue;
+                        this.log.info("[DELETE] - Deleting level [%d].", i);
+                        lev[i] = null;
+                        lev[i] = new WindowLevel(i, this, false);
+
                 }
 
                 this.current.level = new_level;

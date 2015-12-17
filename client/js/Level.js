@@ -45,7 +45,7 @@ function WindowLevel(level, manager, raw)
          */
         this.window_size = function ()
         {
-                var int = {beg: pos_tile(this.pos.beg), end: pos_tile(this.pos.end)};
+                var int = {beg: pos_tile(this.pos.beg, this.level), end: pos_tile(this.pos.end, this.level)};
                 var diff = (int.end - int.beg);
                 if (diff < 0) return window.stat.windowSize();
                 if (diff > 2 * window.stat.windowSize()) {
@@ -62,7 +62,7 @@ function WindowLevel(level, manager, raw)
          */
         this.upIndex = function (index)
         {
-                index = index || pos_tile(this.pos.end);
+                index = index || pos_tile(this.pos.end, level);
                 var up = index;
                 if (up >= lvl_size) {
                         return lvl_size
@@ -80,7 +80,7 @@ function WindowLevel(level, manager, raw)
         this.lowIndex = function (index)
         {
                 if (!index) {
-                        index = pos_tile(this.pos.beg);
+                        index = pos_tile(this.pos.beg, level);
                 }
                 var min = lvl_size - _this.window_size();
                 return (index > min) ? min : index;
@@ -127,6 +127,12 @@ function WindowLevel(level, manager, raw)
          */
         this.addTile = function (index, data)
         {
+                if(!data)
+                {
+                        this.log.error("Tile @ [%d] - is empty!", index );
+                        return;
+                }
+
                 var tile_size = window.config.tile_size;
                 var init_pos = window.stat.tileToPosition(level, index);
                 var one_step = this.tileSize / tile_size;
@@ -184,6 +190,7 @@ function WindowLevel(level, manager, raw)
 
 
                 if (prev_low == -1 || prev_max == -1) {
+                        _this.log.debug("[DEBUG] Getting tiles (whole level): [%d, %d]", min, max);
                         this.connection.getTiles(level, min, max);
                         prev.low = min;
                         prev.max = max;
@@ -195,6 +202,7 @@ function WindowLevel(level, manager, raw)
 
                 if (min_get < prev_low && max_get < prev_low) {
                         this.connection.getTiles(level, min_get, max_get);
+                        _this.log.debug("[DEBUG] Getting tiles (new interval - before - actual): [%d, %d]", min_get, max_get);
                         prev.low = min;
                         prev.max = max;
                         return;
@@ -202,6 +210,7 @@ function WindowLevel(level, manager, raw)
 
                 if (min_get > prev_max) {
                         this.connection.getTiles(level, min_get, max_get);
+                        _this.log.debug("[DEBUG] Getting tiles (new interval - after - actual): [%d, %d]", min_get, max_get);
                         prev.low = min;
                         prev.max = max;
                         return;
@@ -209,9 +218,11 @@ function WindowLevel(level, manager, raw)
 
                 if (min_get != prev_low) {
                         this.connection.getTiles(level, min_get, prev_low + 1);
+                        _this.log.debug("[DEBUG] Getting tiles [before] (prefetch to actual): [%d, %d]", min_get, prev_low + 1);
                 }
 
                 if (max_get != prev_max) {
+                        _this.log.debug("[DEBUG] Getting tiles [after] (postfetch to actual): [%d, %d]", prev_max, max_get + 1);
                         this.connection.getTiles(level, prev_max, max_get + 1);
                 }
 
@@ -228,7 +239,7 @@ function WindowLevel(level, manager, raw)
                 var lowB = this.lowBuffIndex();
                 var up = this.upIndex();
                 var low = this.lowIndex();
-                this.log.info("Requested interval: [%d,%d] of size %d.", lowB, upB, this.lowIndex() - this.lowBuffIndex());
+                //this.log.info("Requested interval: [%d,%d] of size %d.", lowB, upB, this.lowIndex() - this.lowBuffIndex());
 
                 if (window.icfg.communication == "tiles") {
                         this.requestTiles(low, up);
