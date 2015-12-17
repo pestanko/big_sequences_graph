@@ -18,7 +18,7 @@ function WindowLevel(level, manager, raw)
         // Self pointer
         var _this = this;
         // Previous
-        var prev = {up: -1, low: -1};
+        var prev = {max: -1, low: -1};
 
         // Array of Tiles
         this.tiles = new Array(lvl_size);
@@ -165,6 +165,7 @@ function WindowLevel(level, manager, raw)
          */
         this.requestTile = function (index)
         {
+
                 if (!this.getTile(index) && !requested_tiles[index]) {
                         if (index < lvl_size && index >= 0) {
                                 this.connection.getTile(this.level, index);
@@ -177,44 +178,46 @@ function WindowLevel(level, manager, raw)
         {
                 if (beg >= end) return;
                 var min = (beg < 0) ? 0 : beg;
-                var max = (end > lvl_size) ? 0 : end;
-                var lbi = prev.low;
-                var ubi = prev.up;
+                var max = (end > lvl_size) ? lvl_size : end;
+                var prev_low = prev.low;
+                var prev_max = prev.max;
 
-                if (lbi == -1 || ubi == -1) {
+
+                if (prev_low == -1 || prev_max == -1) {
+                        this.log.(">>>>> REQUESTING 0: [%d, %d]", min, max);
                         this.connection.getTiles(level, min, max);
                         prev.low = min;
                         prev.max = max;
                         return;
                 }
 
-                var min_b = (min < lbi) ? min : lbi;
-                var max_b = (max > ubi) ? max : ubi;
+                var min_get = (min < prev_low) ? min : prev_low;
+                var max_get = (max > prev_max) ? max : prev_max;
 
-                if (min < lbi && max < lbi) {
-                        this.connection.getTiles(level, min, max);
+                if (min_get < prev_low && max_get < prev_low) {
+                        this.connection.getTiles(level, min_get, max_get);
                         prev.low = min;
                         prev.max = max;
                         return;
                 }
 
-                if (min > ubi) {
-                        this.connection.getTiles(level, min, max);
+                if (min_get > prev_max) {
+                        this.connection.getTiles(level, min_get, max_get);
                         prev.low = min;
                         prev.max = max;
                         return;
                 }
 
-                if (min_b != lbi) {
-                        this.connection.getTiles(level, min_b, lbi + 1);
+                if (min_get != prev_low) {
+                        this.connection.getTiles(level, min_get, prev_low + 1);
                 }
 
-                if (max_b != ubi) {
-                        this.connection.getTiles(level, ubi, max_b + 1);
+                if (max_get != prev_max) {
+                        this.connection.getTiles(level, prev_max, max_get + 1);
                 }
 
-                prev.low = min;
-                prev.max = max;
+                prev.low = min_get;
+                prev.max = max_get;
         };
 
         /**

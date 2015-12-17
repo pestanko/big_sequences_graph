@@ -37,6 +37,8 @@ function ConnectionManager(host)
         this.wsocket.onmessage = function (event)
         {
                 var message = JSON.parse(event.data);
+                if(message.type == "tile-int")
+                        _this.log.debug("[DEBUG] Size of incoming message:[%d] - {%s} - (%d) [%d, %d] ", event.data.length, message.type, message.level, message.beg, message.end);
 
                 switch (message.type) {
                         case "tile":
@@ -69,7 +71,7 @@ function ConnectionManager(host)
          */
         this.wsocket.onclose = function ()
         {
-                _this.log.info("[INFO] WebSocket closed connection.")
+                _this.log.info("[INFO] WebSocket closed connection.");
                 window.icfg.status = 0;
                 window.stat.updateConnectionStatus(0);
         };
@@ -103,7 +105,7 @@ function ConnectionManager(host)
          */
         this.getTile = function (level, index)
         {
-                _this.log.info("[INFO] Calling get tile for [%d, %d]", level, index);
+                _this.log.info("[DEBUG] Calling get tile for [%d, %d]", level, index);
                 var message =
                 {
                         type : "get",
@@ -122,7 +124,7 @@ function ConnectionManager(host)
          */
         this.getTiles = function (level, beg, end)
         {
-                this.log.info("[INFO] Calling get tiles @ level [%d] and interval [%d, %d]",
+                this.log.info("[DEBUG] Calling get tiles @ level [%d] and interval [%d, %d]",
                               level, beg, end);
                 var message =
                 {
