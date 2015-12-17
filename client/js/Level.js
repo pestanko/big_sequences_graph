@@ -184,7 +184,6 @@ function WindowLevel(level, manager, raw)
 
 
                 if (prev_low == -1 || prev_max == -1) {
-                        this.log.(">>>>> REQUESTING 0: [%d, %d]", min, max);
                         this.connection.getTiles(level, min, max);
                         prev.low = min;
                         prev.max = max;
