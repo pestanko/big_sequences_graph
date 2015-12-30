@@ -7,6 +7,7 @@ var big_graph = SAGE2_App.extend(
                     this.element.style.backgroundColor = "#DDD";
                     this.position = {x: 0, y: 0};
                     this.dragging = false;
+
 	    },
 	    
             init: function (data)
@@ -22,6 +23,7 @@ var big_graph = SAGE2_App.extend(
                     this.host = "ws://localhost:10888/";
                     this.openConnection();
                     this.initializeWidgets();
+                    this.lastDate = new Date();
             },
 
             initializeWidgets: function ()
@@ -51,17 +53,9 @@ var big_graph = SAGE2_App.extend(
 
             draw: function (date)
             {
-                    // application specific 'draw'
+                    console.log("FPS: " + (1000.0 / (date.getTime() - this.lastDate.getTime())).toFixed(0));
 
-                    //this.ctx.fillText("FPS: " + (1000.0 / (date.getTime() - this.lastDate.getTime())).toFixed(0), 10, 20);
-                  /*  var date = new Date();
-                    var n = date.getTime();
-                    var ld = this.lastDate.getTime();
-                    if(!ld)
-                            ld = n;
-                    d3.svg.text("FPS: " + (1000.0 / (n - ld)).toFixed(0) );*/
-
-
+                    this.lastDate = date;
             },
 
             resize: function (date)
