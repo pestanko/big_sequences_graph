@@ -8,6 +8,7 @@ function ConnectionManager(host)
 
         this.wsocket = new WebSocket(host);
         this.log = Logger;
+        this.sum = 0;
 
         /**
          * When tile is received - must be implemented
@@ -37,8 +38,13 @@ function ConnectionManager(host)
         this.wsocket.onmessage = function (event)
         {
                 var message = JSON.parse(event.data);
-                if(message.type == "tile-int")
-                        _this.log.debug("[DEBUG] Size of incoming message:[%d] - {%s} - (%d) [%d, %d] ", event.data.length, message.type, message.level, message.beg, message.end);
+
+                if(message.type == "tile-int") {
+                        var len = event.data.length ;
+                        _this.sum += len;
+                        _this.log.debug("[DEBUG] Size of incoming message:[%f KB] - {%s} - (%d) [%d, %d] ", len / 1000, message.type, message.level, message.beg, message.end);
+                        _this.log.debug("[DEBUG] Total size of messages: [%d KB] or [%f MB]", _this.sum / 1000, _this.sum/ 1000000);
+                }
 
                 switch (message.type) {
                         case "tile":
