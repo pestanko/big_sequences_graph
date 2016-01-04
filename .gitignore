@@ -1,4 +1,5 @@
 .idea
 target
 serverjs/num*.txt
+serverjs/num*.dat
 *.sh
