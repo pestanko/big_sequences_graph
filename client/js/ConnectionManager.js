@@ -88,15 +88,47 @@ function ConnectionManager(host)
          */
         this.updateConfig = function (message)
         {
-                window.config = {
-                        x_axis            : message.x_axis,
-                        y_axis            : message.y_axis,
-                        levels            : message.levels,
-                        tile_size         : message.tile_size,
-                        size              : message.size,
-                        active_window_size: 50,
-                        channels          : message.channels
-                };
+
+                if(!window.config)
+                {
+                        window.config = {};
+                }
+
+                if(message.x_axis)
+                {
+                        window.config.x_axis = message.x_axis;
+                }
+
+                if(message.y_axis)
+                {
+                        window.config.y_axis = message.y_axis;
+                }
+
+                if(message.levels)
+                {
+                        window.config.levels = message.levels;
+                }
+
+                if(message.tile_size)
+                {
+                        window.config.tile_size = message.tile_size;
+                }
+
+                if(message.size)
+                {
+                        window.config.size = message.size;
+                }
+
+                if(message.channels)
+                {
+                        window.config.channels = message.channels;
+                }
+
+                if(!window.config.active_window_size)
+                {
+                        window.config.active_window_size = 50;
+                }
+
 
                 window.icfg.domain.x = window.config.x_axis;
                 window.icfg.domain.y = window.config.y_axis;

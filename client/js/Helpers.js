@@ -26,6 +26,8 @@ window.icfg =
 
 window.stat =
 {
+
+
         /**
          * Calculates windows size in TILES on spec. level
          * @param lvl - Level
